@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-4xl mx-auto flex flex-col gap-8">
+  <div class="max-w-4xl mx-auto">
     <!-- Loading -->
     <div v-if="loading" class="flex justify-center py-12">
       <LoadingSkeleton height="200px" />
@@ -64,7 +64,7 @@
       </div>
 
       <!-- KPI Info Cards Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <!-- Category Card -->
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-7">
           <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
@@ -95,7 +95,7 @@
       </div>
 
       <!-- Description Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8">
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 mb-8">
         <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-5">
           Description
         </h2>
@@ -105,7 +105,7 @@
       </div>
 
       <!-- Supporting Documents Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8">
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 mb-8">
         <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-5">
           Supporting Documents
         </h2>
@@ -155,7 +155,7 @@
       <!-- Review Notes Card (if any) -->
       <div
         v-if="project.reviewNotes.length > 0"
-        class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8"
+        class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 mb-8"
       >
         <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6">
           Review Notes
