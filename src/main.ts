@@ -4,6 +4,7 @@ import App from './App.vue'
 import router from './router'
 import './assets/styles/main.css'
 import { useAuthStore } from './stores/auth'
+import { useDarkMode } from './composables/useDarkMode'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -14,5 +15,9 @@ app.use(router)
 // Initialize auth state from localStorage
 const authStore = useAuthStore()
 authStore.initializeAuth()
+
+// Initialize dark mode from localStorage
+const { initializeDarkMode } = useDarkMode()
+initializeDarkMode()
 
 app.mount('#app')

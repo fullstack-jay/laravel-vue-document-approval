@@ -95,6 +95,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useDarkMode } from '@/composables/useDarkMode'
 import {
   BellIcon,
   MoonIcon,
@@ -115,25 +116,15 @@ const logoImage = computed(() => props.logoImage || defaultLogo)
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { isDark, toggleDarkMode } = useDarkMode()
 
 const user = computed(() => authStore.user)
 const showProfileMenu = ref(false)
 const profileDropdownRef = ref<HTMLElement | null>(null)
-const isDark = ref(false)
 const unreadCount = ref(3) // Mock unread notifications
 
 function toggleProfileMenu() {
   showProfileMenu.value = !showProfileMenu.value
-}
-
-function toggleDarkMode() {
-  isDark.value = !isDark.value
-  if (isDark.value) {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-  }
-  localStorage.setItem('darkMode', isDark.value ? 'dark' : 'light')
 }
 
 async function handleLogout() {
@@ -151,12 +142,6 @@ function handleClickOutside(event: MouseEvent) {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
-  // Initialize dark mode from localStorage
-  const savedDarkMode = localStorage.getItem('darkMode')
-  if (savedDarkMode === 'dark' || (!savedDarkMode && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    isDark.value = true
-    document.documentElement.classList.add('dark')
-  }
 })
 
 onUnmounted(() => {
