@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-5xl mx-auto space-y-6">
+  <div class="max-w-6xl mx-auto space-y-8">
     <!-- Loading -->
     <div v-if="loading" class="flex justify-center py-12">
       <LoadingSkeleton height="200px" />
@@ -7,92 +7,119 @@
 
     <!-- Project Detail -->
     <div v-else-if="project">
-      <!-- Header -->
-      <div class="flex items-center justify-between">
-        <div>
-          <div class="flex items-center space-x-3">
-            <button
-              @click="router.back()"
-              class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            >
-              <ArrowLeftIcon class="h-5 w-5 text-gray-600 dark:text-gray-400" />
-            </button>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-              {{ project.title }}
-            </h1>
-            <StatusBadge :status="project.status" />
+      <!-- Header Section -->
+      <div class="space-y-4">
+        <!-- Back Button -->
+        <button
+          @click="router.back()"
+          class="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+        >
+          <ArrowLeftIcon class="h-4 w-4 mr-2" />
+          Back to Projects
+        </button>
+
+        <!-- Title & Status -->
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex flex-wrap items-center gap-3">
+              <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                {{ project.title }}
+              </h1>
+              <StatusBadge :status="project.status" />
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              Created on {{ formatDate(project.createdAt) }}
+            </p>
           </div>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 ml-8">
-            Created on {{ formatDate(project.createdAt) }}
+
+          <!-- Action buttons -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              v-if="canEdit"
+              @click="router.push(`/projects/${project.id}/edit`)"
+              class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors text-sm font-medium"
+            >
+              <PencilIcon class="h-4 w-4 mr-2" />
+              Edit
+            </button>
+            <button
+              v-if="canSubmit"
+              @click="handleSubmit"
+              :disabled="isSubmitting"
+              class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-50"
+            >
+              <PaperAirplaneIcon class="h-4 w-4 mr-2" />
+              {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+            </button>
+            <button
+              v-if="canDelete"
+              @click="handleDelete"
+              class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium"
+            >
+              <TrashIcon class="h-4 w-4 mr-2" />
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Info Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Category Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+            Category
+          </p>
+          <p class="text-base font-medium text-gray-900 dark:text-white capitalize">
+            {{ project.category }}
           </p>
         </div>
 
-        <!-- Action buttons -->
-        <div class="flex items-center space-x-2">
-          <button
-            v-if="canEdit"
-            @click="router.push(`/projects/${project.id}/edit`)"
-            class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors flex items-center"
-          >
-            <PencilIcon class="h-4 w-4 mr-2" />
-            Edit
-          </button>
-          <button
-            v-if="canSubmit"
-            @click="handleSubmit"
-            :disabled="isSubmitting"
-            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center disabled:opacity-50"
-          >
-            <PaperAirplaneIcon class="h-4 w-4 mr-2" />
-            {{ isSubmitting ? 'Submitting...' : 'Submit' }}
-          </button>
-          <button
-            v-if="canDelete"
-            @click="handleDelete"
-            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center"
-          >
-            <TrashIcon class="h-4 w-4 mr-2" />
-            Delete
-          </button>
+        <!-- Status Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+            Status
+          </p>
+          <StatusBadge :status="project.status" :label="project.status" />
+        </div>
+
+        <!-- Documents Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+            Documents
+          </p>
+          <p class="text-base font-medium text-gray-900 dark:text-white">
+            {{ project.documents.length }} file(s)
+          </p>
         </div>
       </div>
 
       <!-- Description Card -->
-      <Card title="Description" padding="md">
-        <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+          Description
+        </h2>
+        <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">
           {{ project.description }}
         </p>
-      </Card>
-
-      <!-- Info Card -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card title="Category" padding="md">
-          <p class="text-gray-700 dark:text-gray-300 capitalize">
-            {{ project.category }}
-          </p>
-        </Card>
-        <Card title="Status" padding="md">
-          <StatusBadge :status="project.status" :label="project.status" />
-        </Card>
-        <Card title="Documents" padding="md">
-          <p class="text-gray-700 dark:text-gray-300">
-            {{ project.documents.length }} file(s)
-          </p>
-        </Card>
       </div>
 
-      <!-- Documents Card -->
-      <Card title="Supporting Documents" padding="md">
+      <!-- Supporting Documents Card -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+          Supporting Documents
+        </h2>
+
         <div v-if="project.documents.length > 0" class="space-y-3">
           <div
             v-for="doc in project.documents"
             :key="doc.id"
-            class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+            class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600 transition-colors"
           >
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center gap-3">
               <DocumentIcon class="h-5 w-5 text-gray-400" />
               <div>
-                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-200">
                   {{ doc.fileName }}
                 </p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -102,31 +129,48 @@
             </div>
             <button
               @click="handleDownload(doc)"
-              class="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              class="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
+              title="Download document"
             >
               <ArrowDownTrayIcon class="h-5 w-5" />
             </button>
           </div>
         </div>
-        <EmptyState v-else title="No documents" description="No supporting documents uploaded" />
-      </Card>
+
+        <!-- Compact Empty State -->
+        <div
+          v-else
+          class="min-h-[120px] flex flex-col items-center justify-center text-center py-8 px-4"
+        >
+          <DocumentIcon class="h-10 w-10 text-gray-300 dark:text-gray-600 mb-3" />
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+            No documents uploaded
+          </p>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+            Supporting documents will appear here
+          </p>
+        </div>
+      </div>
 
       <!-- Review Notes Card (if any) -->
-      <Card
+      <div
         v-if="project.reviewNotes.length > 0"
-        title="Review Notes"
-        padding="md"
+        class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6"
       >
+        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+          Review Notes
+        </h2>
+
         <div class="space-y-4">
           <div
             v-for="note in project.reviewNotes"
             :key="note.id"
-            class="p-4 rounded-lg"
-            :class="getNoteBgColor(note.type)"
+            class="rounded-lg border p-4"
+            :class="getNoteClasses(note.type)"
           >
-            <div class="flex items-start justify-between">
+            <div class="flex items-start justify-between mb-3">
               <div>
-                <p class="font-medium text-gray-900 dark:text-white">
+                <p class="font-medium" :class="getNoteTitleColor(note.type)">
                   {{ note.reviewerName }}
                 </p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -134,21 +178,25 @@
                 </p>
               </div>
               <span
-                class="px-2 py-1 text-xs font-medium rounded-full"
-                :class="getNoteBadgeColor(note.type)"
+                class="px-2.5 py-1 text-xs font-medium rounded-full border"
+                :class="getNoteBadgeClasses(note.type)"
               >
                 {{ note.type }}
               </span>
             </div>
-            <p class="mt-2 text-gray-700 dark:text-gray-300">
+            <p class="text-sm leading-relaxed" :class="getNoteTextColor(note.type)">
               {{ note.note }}
             </p>
           </div>
         </div>
-      </Card>
+      </div>
 
       <!-- Timeline Card -->
-      <Card title="Timeline" padding="md">
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+          Timeline
+        </h2>
+
         <div class="space-y-4">
           <TimelineItem
             label="Created"
@@ -178,13 +226,16 @@
             :is-error="true"
           />
         </div>
-      </Card>
+      </div>
     </div>
 
-    <!-- Error -->
-    <div v-else class="text-center py-12">
-      <p class="text-gray-500 dark:text-gray-400">Project not found</p>
-      <AppButton @click="router.back()" class="mt-4">
+    <!-- Error State -->
+    <div v-else class="text-center py-16">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+        <DocumentIcon class="h-8 w-8 text-gray-400" />
+      </div>
+      <p class="text-gray-500 dark:text-gray-400 font-medium">Project not found</p>
+      <AppButton @click="router.back()" class="mt-6">
         Go Back
       </AppButton>
     </div>
@@ -192,15 +243,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, inject } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useProjectStore } from '@/modules/projects/stores/projectStore'
 import { useAuthStore } from '@/modules/auth/stores/authStore'
-import type { Project } from '@/modules/projects/types/project'
-import Card from '@/components/common/Card.vue'
+import type { Project, ProjectDocument } from '@/modules/projects/types/project'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import LoadingSkeleton from '@/components/common/LoadingSkeleton.vue'
-import EmptyState from '@/components/common/EmptyState.vue'
 import AppButton from '@/components/common/AppButton.vue'
 import TimelineItem from '@/components/projects/TimelineItem.vue'
 import {
@@ -248,6 +297,7 @@ async function fetchProject() {
 }
 
 async function handleSubmit() {
+  if (!project.value) return
   if (!confirm('Are you sure you want to submit this project for review?')) {
     return
   }
@@ -265,6 +315,7 @@ async function handleSubmit() {
 }
 
 async function handleDelete() {
+  if (!project.value) return
   if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
     return
   }
@@ -277,7 +328,7 @@ async function handleDelete() {
   }
 }
 
-function handleDownload(doc) {
+function handleDownload(doc: ProjectDocument) {
   // Mock download
   alert(`Downloading ${doc.fileName}...`)
 }
@@ -294,24 +345,44 @@ function formatFileSize(bytes: number): string {
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
 }
 
-function getNoteBgColor(type: string): string {
-  const colors = {
-    info: 'bg-blue-50 dark:bg-blue-900/20',
-    revision: 'bg-orange-50 dark:bg-orange-900/20',
-    approval: 'bg-green-50 dark:bg-green-900/20',
-    rejection: 'bg-red-50 dark:bg-red-900/20',
+function getNoteClasses(type: string): string {
+  const classes: Record<string, string> = {
+    info: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800',
+    revision: 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800',
+    approval: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800',
+    rejection: 'bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800',
+  }
+  return classes[type] || classes.info
+}
+
+function getNoteTitleColor(type: string): string {
+  const colors: Record<string, string> = {
+    info: 'text-blue-900 dark:text-blue-200',
+    revision: 'text-orange-900 dark:text-orange-200',
+    approval: 'text-green-900 dark:text-green-200',
+    rejection: 'text-rose-900 dark:text-rose-200',
   }
   return colors[type] || colors.info
 }
 
-function getNoteBadgeColor(type: string): string {
-  const colors = {
-    info: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-    revision: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
-    approval: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
-    rejection: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+function getNoteTextColor(type: string): string {
+  const colors: Record<string, string> = {
+    info: 'text-gray-700 dark:text-gray-300',
+    revision: 'text-gray-700 dark:text-gray-300',
+    approval: 'text-gray-700 dark:text-gray-300',
+    rejection: 'text-gray-700 dark:text-gray-300',
   }
   return colors[type] || colors.info
+}
+
+function getNoteBadgeClasses(type: string): string {
+  const classes: Record<string, string> = {
+    info: 'bg-blue-100/80 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 border-blue-200 dark:border-blue-700',
+    revision: 'bg-orange-100/80 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300 border-orange-200 dark:border-orange-700',
+    approval: 'bg-green-100/80 text-green-700 dark:bg-green-900/50 dark:text-green-300 border-green-200 dark:border-green-700',
+    rejection: 'bg-rose-100/80 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300 border-rose-200 dark:border-rose-700',
+  }
+  return classes[type] || classes.info
 }
 
 onMounted(() => {
