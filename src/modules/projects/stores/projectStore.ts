@@ -249,6 +249,42 @@ export const useProjectStore = defineStore('projects', () => {
   }
 
   /**
+   * Update project status (reviewer action)
+   */
+  async function updateProjectStatus(
+    id: string,
+    status: ProjectStatus,
+    note?: string
+  ) {
+    loading.value = true
+    error.value = null
+
+    try {
+      const updatedProject = await projectService.updateProjectStatus(id, status, note)
+
+      // Update in local state
+      const index = projects.value.findIndex(p => p.id === id)
+      if (index !== -1) {
+        projects.value[index] = {
+          ...projects.value[index],
+          status: updatedProject.status,
+          updatedAt: updatedProject.updatedAt,
+        }
+      }
+
+      currentProject.value = updatedProject
+
+      return updatedProject
+    } catch (err: any) {
+      error.value = err.message || 'Failed to update project status'
+      console.error('Update project status error:', err)
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
    * Set filter
    */
   function setFilter(newFilter: ProjectFilter) {
@@ -302,6 +338,7 @@ export const useProjectStore = defineStore('projects', () => {
     updateProject,
     submitProject,
     deleteProject,
+    updateProjectStatus,
     setFilter,
     resetFilter,
     clearCurrentProject,

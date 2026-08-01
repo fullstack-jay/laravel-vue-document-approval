@@ -37,26 +37,31 @@
 
       <!-- Action buttons (stop propagation) -->
       <div class="flex items-center space-x-2" @click.stop>
-        <button
-          v-if="project.status === 'draft'"
-          @click="$emit('edit', project.id)"
-          class="p-1.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-          title="Edit"
-        >
-          <PencilIcon class="h-4 w-4" />
-        </button>
-        <button
-          v-if="project.status === 'draft'"
-          @click="$emit('delete', project.id)"
-          class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-          title="Delete"
-        >
-          <TrashIcon class="h-4 w-4" />
-        </button>
+        <!-- Applicant actions -->
+        <template v-if="!isReviewer">
+          <button
+            v-if="project.status === 'draft'"
+            @click="$emit('edit', project.id)"
+            class="p-1.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+            title="Edit"
+          >
+            <PencilIcon class="h-4 w-4" />
+          </button>
+          <button
+            v-if="project.status === 'draft'"
+            @click="$emit('delete', project.id)"
+            class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+            title="Delete"
+          >
+            <TrashIcon class="h-4 w-4" />
+          </button>
+        </template>
+
+        <!-- View/Review button -->
         <button
           @click="handleViewDetail"
           class="p-1.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-          title="View Detail"
+          :title="isReviewer ? 'Review Application' : 'View Detail'"
         >
           <ArrowRightIcon class="h-4 w-4" />
         </button>
@@ -78,6 +83,7 @@ import type { ProjectListItem } from '@/modules/projects/types/project'
 
 const props = defineProps<{
   project: ProjectListItem
+  isReviewer?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -113,7 +119,11 @@ function getDescriptionPreview(): string {
 }
 
 function handleViewDetail() {
-  router.push(`/projects/${props.project.id}`)
+  if (props.isReviewer) {
+    router.push(`/projects/${props.project.id}/review`)
+  } else {
+    router.push(`/projects/${props.project.id}`)
+  }
 }
 </script>
 

@@ -122,6 +122,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/pages/projects/EditProject.vue'),
         meta: { requiresAuth: true, draftOnly: true },
       },
+      {
+        path: ':id/review',
+        name: 'ReviewerProjectDetail',
+        component: () => import('@/pages/projects/ReviewerProjectDetail.vue'),
+        meta: { requiresAuth: true, reviewerOnly: true },
+      },
     ],
   },
   // 404

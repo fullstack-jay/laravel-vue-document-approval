@@ -2,11 +2,11 @@
   <div class="space-y-6">
     <!-- Page Header -->
     <PageHeader
-      title="My Projects"
-      subtitle="Manage and track your document submissions"
+      :title="isReviewer ? 'Review Queue' : 'My Projects'"
+      :subtitle="isReviewer ? 'Review and evaluate submitted applications' : 'Manage and track your document submissions'"
     >
       <template #actions>
-        <AppButton @click="router.push('/projects/create')" size="md">
+        <AppButton v-if="!isReviewer" @click="router.push('/projects/create')" size="md">
           <PlusIcon class="h-5 w-5 mr-2" />
           New Project
         </AppButton>
@@ -17,7 +17,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-2">
       <div class="flex flex-wrap gap-2">
         <button
-          v-for="tab in tabs"
+          v-for="tab in availableTabs"
           :key="tab.value"
           @click="handleFilterChange(tab.value)"
           :class="[
@@ -46,7 +46,7 @@
       title="No projects found"
       :description="getEmptyMessage()"
     >
-      <AppButton @click="router.push('/projects/create')" v-if="currentFilter === 'draft'">
+      <AppButton v-if="!isReviewer && currentFilter === 'draft'" @click="router.push('/projects/create')">
         <PlusIcon class="h-5 w-5 mr-2" />
         Create Your First Project
       </AppButton>
@@ -58,6 +58,7 @@
         v-for="project in projects"
         :key="project.id"
         :project="project"
+        :is-reviewer="isReviewer"
         @click="handleProjectClick(project.id)"
         @edit="handleEditProject(project.id)"
         @delete="handleDeleteProject(project.id)"
@@ -88,6 +89,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProjectStore } from '@/modules/projects/stores/projectStore'
+import { useAuthStore } from '@/modules/auth/stores/authStore'
 import { PlusIcon } from '@heroicons/vue/24/outline'
 import PageHeader from '@/components/common/PageHeader.vue'
 import AppButton from '@/components/common/AppButton.vue'
@@ -98,11 +100,12 @@ import type { ProjectStatus } from '@/modules/projects/types/project'
 
 const router = useRouter()
 const projectStore = useProjectStore()
+const authStore = useAuthStore()
 
 const currentFilter = ref<ProjectStatus | 'all'>('all')
 const loading = ref(false)
 
-const tabs = [
+const allTabs = [
   { label: 'All', value: 'all' as const },
   { label: 'Draft', value: 'draft' as ProjectStatus },
   { label: 'Submitted', value: 'submitted' as ProjectStatus },
@@ -110,6 +113,20 @@ const tabs = [
   { label: 'Approved', value: 'approved' as ProjectStatus },
   { label: 'Rejected', value: 'rejected' as ProjectStatus },
 ]
+
+const reviewerTabs = [
+  { label: 'All', value: 'all' as const },
+  { label: 'Submitted', value: 'submitted' as ProjectStatus },
+  { label: 'Revision', value: 'revision' as ProjectStatus },
+  { label: 'Approved', value: 'approved' as ProjectStatus },
+  { label: 'Rejected', value: 'rejected' as ProjectStatus },
+]
+
+const isReviewer = computed(() => authStore.isReviewer)
+
+const availableTabs = computed(() =>
+  isReviewer.value ? reviewerTabs : allTabs
+)
 
 const projects = computed(() => projectStore.projects)
 
@@ -123,7 +140,18 @@ function getCount(status: ProjectStatus | 'all'): number {
 }
 
 function getEmptyMessage(): string {
-  const messages = {
+  if (isReviewer.value) {
+    const reviewerMessages = {
+      all: 'No applications in the review queue',
+      submitted: 'No submitted applications to review',
+      revision: 'No applications requiring revision',
+      approved: 'No approved applications yet',
+      rejected: 'No rejected applications',
+    }
+    return reviewerMessages[currentFilter.value] || reviewerMessages.all
+  }
+
+  const applicantMessages = {
     all: 'You haven\'t created any projects yet',
     draft: 'No draft projects',
     submitted: 'No submitted projects',
@@ -131,7 +159,7 @@ function getEmptyMessage(): string {
     approved: 'No approved projects yet',
     rejected: 'No rejected projects',
   }
-  return messages[currentFilter.value] || messages.all
+  return applicantMessages[currentFilter.value] || applicantMessages.all
 }
 
 async function handleFilterChange(status: ProjectStatus | 'all') {
@@ -139,10 +167,20 @@ async function handleFilterChange(status: ProjectStatus | 'all') {
   loading.value = true
 
   try {
-    if (status === 'all') {
-      await projectStore.fetchProjects()
+    if (isReviewer.value) {
+      // Fetch reviewer projects
+      if (status === 'all') {
+        await projectStore.fetchReviewerProjects()
+      } else {
+        await projectStore.fetchReviewerProjects({ status })
+      }
     } else {
-      await projectStore.fetchProjects({ status })
+      // Fetch applicant projects
+      if (status === 'all') {
+        await projectStore.fetchProjects()
+      } else {
+        await projectStore.fetchProjects({ status })
+      }
     }
   } finally {
     loading.value = false
@@ -150,7 +188,11 @@ async function handleFilterChange(status: ProjectStatus | 'all') {
 }
 
 function handleProjectClick(id: string) {
-  router.push(`/projects/${id}`)
+  if (isReviewer.value) {
+    router.push(`/projects/${id}/review`)
+  } else {
+    router.push(`/projects/${id}`)
+  }
 }
 
 function handleEditProject(id: string) {
