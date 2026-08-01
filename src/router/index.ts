@@ -150,12 +150,24 @@ const router = createRouter({
 
 // Navigation guards
 router.beforeEach(async (to, from, next) => {
-  // Get auth state from localStorage (simple check)
+  // Get auth state from localStorage
   const token = localStorage.getItem('access_token')
+  const userData = localStorage.getItem('user_data')
   const isAuthenticated = !!token
+
+  let userRole: string | null = null
+  if (userData) {
+    try {
+      const user = JSON.parse(userData)
+      userRole = user.role
+    } catch (e) {
+      console.error('Failed to parse user data:', e)
+    }
+  }
 
   const requiresAuth = to.meta.requiresAuth || to.matched.some(record => record.meta.requiresAuth)
   const requiresGuest = to.meta.requiresGuest || to.matched.some(record => record.meta.requiresGuest)
+  const reviewerOnly = to.meta.reviewerOnly || to.matched.some(record => record.meta.reviewerOnly)
 
   if (requiresAuth && !isAuthenticated) {
     // Redirect to login with return URL
@@ -165,8 +177,17 @@ router.beforeEach(async (to, from, next) => {
     })
   }
 
+  // Check reviewer-only routes
+  if (reviewerOnly && isAuthenticated && userRole !== 'reviewer' && userRole !== 'admin') {
+    // Non-reviewers trying to access reviewer routes
+    return next('/dashboard')
+  }
+
   if (requiresGuest && isAuthenticated) {
-    // Redirect to dashboard if already authenticated
+    // Redirect based on role
+    if (userRole === 'reviewer' || userRole === 'admin') {
+      return next('/reviewer-dashboard')
+    }
     return next('/dashboard')
   }
 

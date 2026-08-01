@@ -141,7 +141,7 @@ function getCount(status: ProjectStatus | 'all'): number {
 
 function getEmptyMessage(): string {
   if (isReviewer.value) {
-    const reviewerMessages = {
+    const reviewerMessages: Record<string, string> = {
       all: 'No applications in the review queue',
       submitted: 'No submitted applications to review',
       revision: 'No applications requiring revision',
@@ -151,7 +151,7 @@ function getEmptyMessage(): string {
     return reviewerMessages[currentFilter.value] || reviewerMessages.all
   }
 
-  const applicantMessages = {
+  const applicantMessages: Record<string, string> = {
     all: 'You haven\'t created any projects yet',
     draft: 'No draft projects',
     submitted: 'No submitted projects',

@@ -469,6 +469,8 @@ async function handleReviewAction() {
   errorMessage.value = ''
 
   try {
+    if (!project.value) return
+
     const statusMap = {
       approval: 'approved' as const,
       revision: 'revision' as const,

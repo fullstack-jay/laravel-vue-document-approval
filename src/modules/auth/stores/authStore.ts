@@ -11,7 +11,7 @@ export const useAuthStore = defineStore('auth', () => {
   const error = ref<string | null>(null)
 
   // Initialize user from localStorage if available
-  if (import.meta.client) {
+  if (typeof window !== 'undefined') {
     const storedUser = localStorage.getItem('user_data')
     if (storedUser) {
       try {

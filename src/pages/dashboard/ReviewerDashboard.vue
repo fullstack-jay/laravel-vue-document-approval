@@ -8,7 +8,7 @@
       <template #actions>
         <AppButton
           variant="primary"
-          @click="$router.push('/review')"
+          @click="$router.push('/projects')"
         >
           <ClipboardDocumentListIcon class="w-5 h-5 mr-2" />
           Review Queue ({{ stats.submitted }})
@@ -120,7 +120,7 @@
           <AppButton
             variant="primary"
             size="lg"
-            @click="$router.push('/review')"
+            @click="$router.push('/projects')"
           >
             <ClipboardDocumentListIcon class="w-5 h-5 mr-2" />
             Review Queue
@@ -128,26 +128,26 @@
           <AppButton
             variant="secondary"
             size="lg"
-            @click="$router.push('/review?status=approved')"
+            @click="$router.push('/projects')"
           >
             <CheckCircleIcon class="w-5 h-5 mr-2" />
-            Approved
+            All Projects
           </AppButton>
           <AppButton
             variant="secondary"
             size="lg"
-            @click="$router.push('/review?status=revision')"
+            @click="$router.push('/profile')"
           >
             <ArrowPathIcon class="w-5 h-5 mr-2" />
-            Revisions
+            Profile
           </AppButton>
           <AppButton
             variant="secondary"
             size="lg"
-            @click="$router.push('/statistics')"
+            @click="$router.push('/projects')"
           >
             <ChartBarIcon class="w-5 h-5 mr-2" />
-            Statistics
+            View Projects
           </AppButton>
         </div>
       </Card>

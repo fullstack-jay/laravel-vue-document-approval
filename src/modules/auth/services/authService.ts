@@ -51,13 +51,28 @@ export const authService = {
     await new Promise(resolve => setTimeout(resolve, 300))
   },
 
-  async getCurrentUser(_token: string): Promise<User> {
-    await new Promise(resolve => setTimeout(resolve, 500))
+  async getCurrentUser(token: string): Promise<User> {
+    await new Promise(resolve => setTimeout(resolve, 300))
 
     // Mock user lookup by token (in real app, decode JWT or call API)
-    const user = mockUsers[0] // Return first user as current
-    const { password, ...userWithoutPassword } = user
+    // For now, we'll look up user from stored localStorage data in the store
+    // This method is mainly for API calls in production
 
+    // Try to get user from localStorage (this is a workaround for mock)
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('user_data')
+      if (storedUser) {
+        try {
+          return JSON.parse(storedUser)
+        } catch (e) {
+          console.error('Failed to parse stored user:', e)
+        }
+      }
+    }
+
+    // Fallback to first user (shouldn't happen in normal flow)
+    const user = mockUsers[0]
+    const { password, ...userWithoutPassword } = user
     return userWithoutPassword
   },
 }

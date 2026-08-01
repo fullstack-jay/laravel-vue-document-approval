@@ -170,9 +170,18 @@ async function handleLogin() {
     setLoading(true)
     await authStore.login(form.value)
 
-    // Redirect to the page they were trying to access, or dashboard
-    const redirect = (route.query.redirect as string) || '/dashboard'
-    router.push(redirect)
+    // Redirect based on user role
+    const redirect = (route.query.redirect as string) || null
+    if (redirect) {
+      router.push(redirect)
+    } else {
+      // Redirect based on role
+      if (authStore.isReviewer || authStore.isAdmin) {
+        router.push('/reviewer-dashboard')
+      } else {
+        router.push('/dashboard')
+      }
+    }
   } catch (error) {
     // Error is handled by the store and displayed via errorMessage computed
     console.error('Login failed:', error)
