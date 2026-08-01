@@ -80,6 +80,19 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+  // Profile routes with AppLayout
+  {
+    path: '/profile',
+    component: AppLayout,
+    children: [
+      {
+        path: '',
+        name: 'Profile',
+        component: () => import('@/pages/profile/Profile.vue'),
+        meta: { requiresAuth: true },
+      },
+    ],
+  },
   // Project routes with AppLayout
   {
     path: '/projects',
