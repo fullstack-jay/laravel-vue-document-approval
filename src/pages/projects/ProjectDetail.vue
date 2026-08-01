@@ -8,7 +8,7 @@
     <!-- Project Detail -->
     <div v-else-if="project">
       <!-- Header Section -->
-      <div class="space-y-4">
+      <div class="space-y-4 mb-10">
         <!-- Back Button -->
         <button
           @click="router.back()"
