@@ -80,23 +80,10 @@ provide('setLoading', setLoading)
 onMounted(() => {
   console.log('lottieSrc.value:', lottieSrc.value)
 
-  // Fetch the file to cache it
-  fetch(lottieSrc.value)
-    .then(response => {
-      console.log('Lottie file loaded')
-      animationLoaded.value = true
-
-      // Tunggu 1.5 detik agar user bisa melihat animasi
-      setTimeout(() => {
-        isInitialLoading.value = false
-      }, 1500)
-    })
-    .catch(error => {
-      console.error('Failed to load lottie:', error)
-      // Tetap lanjut walau gagal load
-      setTimeout(() => {
-        isInitialLoading.value = false
-      }, 500)
-    })
+  // Don't fetch the file, just show loading for 1 second
+  // This avoids the fetch error and allows page to load
+  setTimeout(() => {
+    isInitialLoading.value = false
+  }, 1000)
 })
 </script>

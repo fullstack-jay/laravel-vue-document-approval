@@ -149,7 +149,7 @@ const router = createRouter({
 })
 
 // Navigation guards
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to) => {
   // Get auth state from localStorage
   const token = localStorage.getItem('access_token')
   const userData = localStorage.getItem('user_data')
@@ -171,24 +171,24 @@ router.beforeEach(async (to, from, next) => {
 
   if (requiresAuth && !isAuthenticated) {
     // Redirect to login with return URL
-    return next({
+    return {
       path: '/login',
       query: { redirect: to.fullPath },
-    })
+    }
   }
 
   // Check reviewer-only routes
   if (reviewerOnly && isAuthenticated && userRole !== 'reviewer' && userRole !== 'admin') {
     // Non-reviewers trying to access reviewer routes
-    return next('/dashboard')
+    return '/dashboard'
   }
 
   if (requiresGuest && isAuthenticated) {
     // Redirect based on role
     if (userRole === 'reviewer' || userRole === 'admin') {
-      return next('/reviewer-dashboard')
+      return '/reviewer-dashboard'
     }
-    return next('/dashboard')
+    return '/dashboard'
   }
 
   // Check draft-only routes (like EditProject)
@@ -198,7 +198,13 @@ router.beforeEach(async (to, from, next) => {
     // In production, you might want to fetch the project here
   }
 
-  next()
+  // Return undefined to continue navigation
+  return
+})
+
+// Error handler for navigation
+router.onError((error) => {
+  console.error('Router error:', error)
 })
 
 export default router
