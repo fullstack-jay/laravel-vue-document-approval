@@ -94,7 +94,6 @@ const applicantMenu = [
 const reviewerMenu = [
   { name: 'Dashboard', to: '/reviewer-dashboard', icon: HomeIcon },
   { name: 'Review Queue', to: '/projects', icon: ClipboardDocumentListIcon },
-  { name: 'Profile', to: '/profile', icon: DocumentTextIcon },
 ]
 
 const handleLinkClick = () => {
