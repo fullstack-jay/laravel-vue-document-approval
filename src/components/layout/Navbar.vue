@@ -77,14 +77,6 @@
                 <UserIcon class="w-4 h-4 mr-3" />
                 Profile
               </router-link>
-              <router-link
-                to="/settings"
-                class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                @click="showProfileMenu = false"
-              >
-                <CogIcon class="w-4 h-4 mr-3" />
-                Settings
-              </router-link>
               <hr class="my-1 border-gray-200 dark:border-gray-700" />
               <button
                 @click="handleLogout"
@@ -112,7 +104,6 @@ import {
   SunIcon,
   ChevronDownIcon,
   UserIcon,
-  CogIcon,
   ArrowRightOnRectangleIcon,
   Bars3Icon,
 } from '@heroicons/vue/24/outline'
