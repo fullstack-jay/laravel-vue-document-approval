@@ -1,173 +1,195 @@
-<div id="top"></div>
+# Document Approval Management System - Frontend
 
-<!-- PROJECT SHIELDS -->
+A modern, production-ready frontend application for a Document Approval Management System built with Vue 3, Vite, TypeScript, and Tailwind CSS.
 
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
+## Features
 
-<!-- PROJECT LOGO -->
-<br />
+- **Authentication**: Login, Register, Forgot Password, Reset Password
+- **Role-Based Dashboards**: Separate dashboards for Applicants and Reviewers
+- **Mock API Integration**: Ready for backend integration
+- **Responsive Design**: Mobile-first approach with Tailwind CSS
+- **Dark Mode**: Built-in dark mode support
+- **Type Safety**: Full TypeScript support
+- **Clean Architecture**: Feature-based folder structure
+- **Modern UI**: Reusable components with Vue 3 Composition API
 
-<div align="center">
-	<a href="https://github.com/clemissile/clean-vuejs-starter">
-		<img src="src/assets/logo.png" alt="Logo" width="80" height="80">
-	</a>
-	<h3 align="center">clean-vuejs-starter</h3>
-	<p align="center">
-		A ✨ <i>clean</i> ✨ VueJs 3 project starter !
-		<br />
-		<br />
-		<a href="https://github.com/clemissile/clean-vuejs-starter/issues">Report Bug</a>
-		·
-		<a href="https://github.com/clemissile/clean-vuejs-starter/issues">Request Feature</a>
-	</p>
-</div>
+## Tech Stack
 
-<!-- TABLE OF CONTENTS -->
-<details>
-	<summary>Table of Contents</summary>
-	<ol>
-		<li>
-			<a href="#about-the-project">About The Project</a>
-			<ul>
-				<li><a href="#built-with">Built With</a></li>
-			</ul>
-		</li>
-		<li>
-			<a href="#getting-started">Getting Started</a>
-			<ul>
-				<li><a href="#prerequisites">Prerequisites</a></li>
-				<li><a href="#installation">Installation</a></li>
-			</ul>
-		</li>
-		<li><a href="#contributing">Contributing</a></li>
-		<li><a href="#license">License</a></li>
-		<li><a href="#contact">Contact</a></li>
-		<li><a href="#acknowledgments">Acknowledgments</a></li>
-	</ol>
-</details>
+- **Framework**: Vue 3 (Composition API)
+- **Build Tool**: Vite 8
+- **Language**: TypeScript 5
+- **State Management**: Pinia
+- **Routing**: Vue Router 4
+- **Styling**: Tailwind CSS v3
+- **HTTP Client**: Axios
+- **Icons**: Heroicons Vue
 
-<!-- ABOUT THE PROJECT -->
+## Project Structure
 
-## About The Project
-
-There are many great VueJs starters available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one.
-
-### Built With
-
-- [VueJs 3](https://v3.vuejs.org/)
-- [Vue Router](https://router.vuejs.org/)
-- [Vuex](https://vuex.vuejs.org/)
-- [Dart Sass](https://sass-lang.com/dart-sass)
-- [TailwindCSS](https://tailwindcss.com/)
-- [Axios](https://github.com/axios/axios)
-
-<!-- GETTING STARTED -->
+```
+src/
+├── assets/
+│   └── styles/
+│       └── main.css
+├── components/
+│   ├── common/           # Reusable UI components
+│   ├── layout/           # Layout components (Navbar, Sidebar)
+│   └── dashboard/        # Dashboard-specific components
+├── composables/          # Vue composables
+├── layouts/              # Page layouts
+├── modules/              # Feature modules
+│   ├── auth/
+│   └── dashboard/
+├── pages/                # Route pages
+│   ├── auth/
+│   └── dashboard/
+├── router/               # Vue Router configuration
+├── services/             # API services
+│   ├── api/
+│   └── mock/
+├── stores/               # Pinia stores
+├── types/                # TypeScript type definitions
+├── utils/                # Utility functions
+├── App.vue
+└── main.ts
+```
 
 ## Getting Started
 
 ### Prerequisites
 
-- npm
-  ```sh
-  npm install npm@latest -g
-  ```
+- Node.js 18+ 
+- npm or yarn
 
 ### Installation
 
-1. Clone the repo
-   ```sh
-   git clone https://github.com/clemissile/clean-vuejs-starter.git
-   ```
-2. Install NPM packages
-   ```sh
-   npm install
-   ```
-3. Launch the project
-   ```sh
-   npm run serve
-   ```
+1. Install dependencies:
+```bash
+npm install
+```
 
-### Prepare for production
+2. Start development server:
+```bash
+npm run dev
+```
 
-```sh
+3. Build for production:
+```bash
 npm run build
 ```
 
-<!-- Prettier -->
+4. Preview production build:
+```bash
+npm run preview
+```
 
-## Prettier
+## Demo Credentials
 
-This project use [Prettier](https://prettier.io/) as code formatter. The format to use is defined in the `.prettierrc.js` file.
+The application uses mock data for demonstration:
 
-### Prerequisites
+**Applicant:**
+- Email: `applicant@example.com`
+- Password: `password123`
 
-Download and enable the Prettier extension for VS Code. You can find it [just here](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode).
+**Reviewer:**
+- Email: `reviewer@example.com`
+- Password: `password123`
 
-### Define Prettier as default formatter
+## Available Pages
 
-Go to `File > Preferences > Settings` (or hit `CTRL + ,` on Windows or `COMMAND + ,` on macOS) and search for _default formatter_ then select **Prettier - Code formatter** under **Editor: Default Formatter**.
+### Authentication
+- `/login` - Login page
+- `/register` - Registration page
+- `/forgot-password` - Password reset request
+- `/reset-password` - Reset password form
 
-### Enable format on save
+### Dashboard
+- `/dashboard` - Applicant dashboard
+- `/reviewer-dashboard` - Reviewer dashboard
 
-Go to `File > Preferences > Settings` (or hit `CTRL + ,` on Windows or `COMMAND + ,` on macOS) and search for _format on save_ then ensure **Editor: Format On Save** is checked.
+## Components
 
-Congrats, you're ready to go ! Now, on each save, Prettier will format files for you.
+### Common Components
+- `AppButton` - Reusable button with variants and loading states
+- `AppInput` - Form input with validation
+- `Card` - Container component for content sections
+- `StatusBadge` - Badge for displaying application status
+- `EmptyState` - Placeholder for empty content
+- `LoadingSkeleton` - Skeleton loading state
+- `PageHeader` - Page title and actions header
 
-<!-- CONTRIBUTING -->
+### Dashboard Components
+- `StatisticCard` - Display statistics with icons and trends
+- `ActivityCard` - Display activity items
+- `ActivityList` - List of activities
 
-## Contributing
+### Layout Components
+- `Navbar` - Top navigation bar with user menu
+- `Sidebar` - Side navigation menu
+- `SidebarLink` - Navigation link with active states
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+## Stores (Pinia)
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
+### Auth Store
+```typescript
+import { useAuthStore } from '@/stores/auth'
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+const authStore = useAuthStore()
+await authStore.login({ email, password })
+await authStore.logout()
+```
 
-<!-- LICENSE -->
+### Dashboard Store
+```typescript
+import { useDashboardStore } from '@/stores/dashboard'
+
+const dashboardStore = useDashboardStore()
+await dashboardStore.fetchDashboardStats('applicant')
+```
+
+## Status Types
+
+The application uses the following status types:
+
+- `draft` - Application is in draft state
+- `submitted` - Application has been submitted
+- `revision` - Application needs revision
+- `approved` - Application has been approved
+- `rejected` - Application has been rejected
+- `created` - Resource was created
+
+## Customization
+
+### Colors
+
+Custom colors are defined in `tailwind.config.js`:
+
+```javascript
+colors: {
+  primary: { /* ... */ },
+  draft: '#6B7280',
+  submitted: '#3B82F6',
+  revision: '#F59E0B',
+  approved: '#10B981',
+  rejected: '#EF4444'
+}
+```
+
+### Theme
+
+The application supports dark mode. Toggle is available in the navbar.
+
+## Roadmap
+
+Future enhancements:
+- [ ] Project list with pagination/filtering
+- [ ] Create/Edit project forms
+- [ ] Document upload functionality
+- [ ] Review workflow pages
+- [ ] Notification system
+- [ ] Profile settings
+- [ ] Real-time updates
 
 ## License
 
-Distributed under the MIT License. See `LICENSE.md` for more information.
-
-<!-- CONTACT -->
-
-## Contact
-
-Clemissile - [@clemissile](https://twitter.com/clemissile) - ganivetclement@gmail.com
-
-Project Link: [https://github.com/clemissile/clean-vuejs-starter](https://github.com/clemissile/clean-vuejs-starter)
-
-<!-- ACKNOWLEDGMENTS -->
-
-## Acknowledgments
-
-- [Custom CSS Rest](https://www.joshwcomeau.com/css/custom-css-reset/)
-- [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
-- [Choose an Open Source License](https://choosealicense.com)
-- [Img Shields](https://shields.io)
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-
-[contributors-shield]: https://img.shields.io/github/contributors/clemissile/clean-vuejs-starter.svg?style=for-the-badge
-[contributors-url]: https://github.com/clemissile/clean-vuejs-starter/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/clemissile/clean-vuejs-starter.svg?style=for-the-badge
-[forks-url]: https://github.com/clemissile/clean-vuejs-starter/network/members
-[stars-shield]: https://img.shields.io/github/stars/clemissile/clean-vuejs-starter.svg?style=for-the-badge
-[stars-url]: https://github.com/clemissile/clean-vuejs-starter/stargazers
-[issues-shield]: https://img.shields.io/github/issues/clemissile/clean-vuejs-starter.svg?style=for-the-badge
-[issues-url]: https://github.com/clemissile/clean-vuejs-starter/issues
-[license-shield]: https://img.shields.io/github/license/clemissile/clean-vuejs-starter.svg?style=for-the-badge
-[license-url]: https://github.com/clemissile/clean-vuejs-starter/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/clementganivet
+MIT License
