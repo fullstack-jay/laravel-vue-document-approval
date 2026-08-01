@@ -1,32 +1,34 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </div>
   <router-view />
 </template>
 
-<style src="./assets/scss/main.scss" lang="scss"></style>
+<script setup lang="ts">
+// Main App component - delegates routing to Vue Router
+</script>
 
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+<style>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
 }
 
-#nav {
-  padding: 30px;
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
 
-    &.router-link-exact-active {
-      color: $primary;
-    }
-  }
+.slide-enter-from {
+  transform: translateX(20px);
+  opacity: 0;
+}
+
+.slide-leave-to {
+  transform: translateX(-20px);
+  opacity: 0;
 }
 </style>
