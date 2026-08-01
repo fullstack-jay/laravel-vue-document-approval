@@ -10,6 +10,18 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
+  // Initialize user from localStorage if available
+  if (import.meta.client) {
+    const storedUser = localStorage.getItem('user_data')
+    if (storedUser) {
+      try {
+        user.value = JSON.parse(storedUser)
+      } catch (e) {
+        console.error('Failed to parse stored user data:', e)
+      }
+    }
+  }
+
   // Getters
   const isAuthenticated = computed(() => !!token.value)
   const userRole = computed(() => user.value?.role || null)
@@ -26,6 +38,7 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = response.user
       token.value = response.token
       localStorage.setItem('access_token', response.token)
+      localStorage.setItem('user_data', JSON.stringify(response.user))
       return response
     } catch (err: any) {
       error.value = err.message
@@ -43,6 +56,7 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = response.user
       token.value = response.token
       localStorage.setItem('access_token', response.token)
+      localStorage.setItem('user_data', JSON.stringify(response.user))
       return response
     } catch (err: any) {
       error.value = err.message
@@ -60,6 +74,7 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = null
       token.value = null
       localStorage.removeItem('access_token')
+      localStorage.removeItem('user_data')
       loading.value = false
     }
   }
@@ -84,9 +99,18 @@ export const useAuthStore = defineStore('auth', () => {
 
   function initializeAuth() {
     const storedToken = localStorage.getItem('access_token')
+    const storedUser = localStorage.getItem('user_data')
+
     if (storedToken) {
       token.value = storedToken
-      fetchUser()
+    }
+
+    if (storedUser) {
+      try {
+        user.value = JSON.parse(storedUser)
+      } catch (e) {
+        console.error('Failed to parse stored user data:', e)
+      }
     }
   }
 
