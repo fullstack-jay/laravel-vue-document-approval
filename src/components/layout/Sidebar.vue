@@ -56,12 +56,7 @@ import {
   HomeIcon,
   DocumentTextIcon,
   FolderOpenIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ArrowPathIcon,
   ClipboardDocumentListIcon,
-  ChartBarIcon,
   XMarkIcon,
 } from '@heroicons/vue/24/outline'
 import SidebarLink from './SidebarLink.vue'
@@ -97,12 +92,9 @@ const applicantMenu = [
 ]
 
 const reviewerMenu = [
-  { name: 'Dashboard', to: '/dashboard', icon: HomeIcon },
-  { name: 'Review Queue', to: '/review', icon: ClipboardDocumentListIcon },
-  { name: 'Approved', to: '/review?status=approved', icon: CheckCircleIcon },
-  { name: 'Rejected', to: '/review?status=rejected', icon: XCircleIcon },
-  { name: 'Revisions', to: '/review?status=revision', icon: ArrowPathIcon },
-  { name: 'Statistics', to: '/statistics', icon: ChartBarIcon },
+  { name: 'Dashboard', to: '/reviewer-dashboard', icon: HomeIcon },
+  { name: 'Review Queue', to: '/projects', icon: ClipboardDocumentListIcon },
+  { name: 'Profile', to: '/profile', icon: DocumentTextIcon },
 ]
 
 const handleLinkClick = () => {
