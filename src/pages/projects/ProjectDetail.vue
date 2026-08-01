@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-6xl mx-auto space-y-8">
+  <div class="max-w-4xl mx-auto space-y-10">
     <!-- Loading -->
     <div v-if="loading" class="flex justify-center py-12">
       <LoadingSkeleton height="200px" />
@@ -64,10 +64,10 @@
       </div>
 
       <!-- KPI Info Cards Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <!-- Category Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
             Category
           </p>
           <p class="text-base font-medium text-gray-900 dark:text-white capitalize">
@@ -76,16 +76,16 @@
         </div>
 
         <!-- Status Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
             Status
           </p>
           <StatusBadge :status="project.status" :label="project.status" />
         </div>
 
         <!-- Documents Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
             Documents
           </p>
           <p class="text-base font-medium text-gray-900 dark:text-white">
@@ -95,7 +95,7 @@
       </div>
 
       <!-- Description Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8">
         <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
           Description
         </h2>
@@ -105,7 +105,7 @@
       </div>
 
       <!-- Supporting Documents Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8">
         <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
           Supporting Documents
         </h2>
@@ -155,20 +155,20 @@
       <!-- Review Notes Card (if any) -->
       <div
         v-if="project.reviewNotes.length > 0"
-        class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6"
+        class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8"
       >
-        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-5">
           Review Notes
         </h2>
 
-        <div class="space-y-4">
+        <div class="space-y-5">
           <div
             v-for="note in project.reviewNotes"
             :key="note.id"
-            class="rounded-lg border p-4"
+            class="rounded-lg border p-5"
             :class="getNoteClasses(note.type)"
           >
-            <div class="flex items-start justify-between mb-3">
+            <div class="flex items-start justify-between mb-4">
               <div>
                 <p class="font-medium" :class="getNoteTitleColor(note.type)">
                   {{ note.reviewerName }}
@@ -192,8 +192,8 @@
       </div>
 
       <!-- Timeline Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8">
+        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-5">
           Timeline
         </h2>
 
