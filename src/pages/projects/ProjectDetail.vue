@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-4xl mx-auto space-y-10">
+  <div class="max-w-4xl mx-auto flex flex-col gap-8">
     <!-- Loading -->
     <div v-if="loading" class="flex justify-center py-12">
       <LoadingSkeleton height="200px" />
@@ -64,10 +64,10 @@
       </div>
 
       <!-- KPI Info Cards Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Category Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-7">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
             Category
           </p>
           <p class="text-base font-medium text-gray-900 dark:text-white capitalize">
@@ -76,16 +76,16 @@
         </div>
 
         <!-- Status Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-7">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
             Status
           </p>
           <StatusBadge :status="project.status" :label="project.status" />
         </div>
 
         <!-- Documents Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-7">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
             Documents
           </p>
           <p class="text-base font-medium text-gray-900 dark:text-white">
@@ -96,7 +96,7 @@
 
       <!-- Description Card -->
       <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8">
-        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-5">
           Description
         </h2>
         <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">
@@ -106,7 +106,7 @@
 
       <!-- Supporting Documents Card -->
       <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8">
-        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-5">
           Supporting Documents
         </h2>
 
@@ -157,15 +157,15 @@
         v-if="project.reviewNotes.length > 0"
         class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8"
       >
-        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-5">
+        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6">
           Review Notes
         </h2>
 
-        <div class="space-y-5">
+        <div class="space-y-6">
           <div
             v-for="note in project.reviewNotes"
             :key="note.id"
-            class="rounded-lg border p-5"
+            class="rounded-lg border p-6 mt-3"
             :class="getNoteClasses(note.type)"
           >
             <div class="flex items-start justify-between mb-4">
@@ -193,11 +193,11 @@
 
       <!-- Timeline Card -->
       <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8">
-        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-5">
+        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6">
           Timeline
         </h2>
 
-        <div class="space-y-4">
+        <div class="space-y-5">
           <TimelineItem
             label="Created"
             :date="project.createdAt"
