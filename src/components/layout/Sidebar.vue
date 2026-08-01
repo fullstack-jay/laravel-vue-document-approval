@@ -51,7 +51,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/modules/auth/stores/authStore'
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -94,10 +94,6 @@ const roleBadgeClass = computed(() => {
 const applicantMenu = [
   { name: 'Dashboard', to: '/dashboard', icon: HomeIcon },
   { name: 'My Projects', to: '/projects', icon: FolderOpenIcon },
-  { name: 'Drafts', to: '/projects?status=draft', icon: DocumentTextIcon },
-  { name: 'Submitted', to: '/projects?status=submitted', icon: ClipboardDocumentListIcon },
-  { name: 'Revisions', to: '/projects?status=revision', icon: ArrowPathIcon },
-  { name: 'History', to: '/history', icon: ClockIcon },
 ]
 
 const reviewerMenu = [

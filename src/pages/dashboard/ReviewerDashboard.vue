@@ -157,7 +157,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, inject } from 'vue'
-import { useDashboardStore } from '@/stores/dashboard'
+import { useDashboardStore } from '@/modules/dashboard/stores/dashboardStore'
 import PageHeader from '@/components/common/PageHeader.vue'
 import StatisticCard from '@/components/dashboard/StatisticCard.vue'
 import Card from '@/components/common/Card.vue'

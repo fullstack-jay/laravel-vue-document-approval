@@ -3,7 +3,7 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import './assets/styles/main.css'
-import { useAuthStore } from './stores/auth'
+import { useAuthStore } from './modules/auth/stores/authStore'
 import { useDarkMode } from './composables/useDarkMode'
 
 const app = createApp(App)

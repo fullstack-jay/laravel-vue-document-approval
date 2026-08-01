@@ -80,6 +80,37 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+  // Project routes with AppLayout
+  {
+    path: '/projects',
+    component: AppLayout,
+    children: [
+      {
+        path: '',
+        name: 'ProjectList',
+        component: () => import('@/pages/projects/ProjectList.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'create',
+        name: 'CreateProject',
+        component: () => import('@/pages/projects/CreateProject.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: ':id',
+        name: 'ProjectDetail',
+        component: () => import('@/pages/projects/ProjectDetail.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: ':id/edit',
+        name: 'EditProject',
+        component: () => import('@/pages/projects/EditProject.vue'),
+        meta: { requiresAuth: true, draftOnly: true },
+      },
+    ],
+  },
   // 404
   {
     path: '/:pathMatch(.*)*',
@@ -99,7 +130,7 @@ const router = createRouter({
 })
 
 // Navigation guards
-router.beforeEach((to) => {
+router.beforeEach(async (to, from, next) => {
   // Get auth state from localStorage (simple check)
   const token = localStorage.getItem('access_token')
   const isAuthenticated = !!token
@@ -109,16 +140,25 @@ router.beforeEach((to) => {
 
   if (requiresAuth && !isAuthenticated) {
     // Redirect to login with return URL
-    return {
+    return next({
       path: '/login',
       query: { redirect: to.fullPath },
-    }
+    })
   }
+
   if (requiresGuest && isAuthenticated) {
     // Redirect to dashboard if already authenticated
-    return '/dashboard'
+    return next('/dashboard')
   }
-  return true
+
+  // Check draft-only routes (like EditProject)
+  const draftOnly = to.meta.draftOnly || to.matched.some(record => record.meta.draftOnly)
+  if (draftOnly && isAuthenticated) {
+    // For now, allow access. ProjectDetail will check if draft and redirect if not
+    // In production, you might want to fetch the project here
+  }
+
+  next()
 })
 
 export default router
