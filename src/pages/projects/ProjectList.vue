@@ -206,17 +206,24 @@ async function handleDeleteProject(id: string) {
 
   loading.value = true
 
+  console.log('🗑️ Attempting to delete project:', id)
+
   try {
     await projectStore.deleteProject(id)
+    console.log('✅ Project deleted successfully')
   } catch (error: any) {
+    console.log('⚠️ Delete error:', error.message)
     // Show error only if it's not a "not found" error
     if (!error.message?.includes('not found') && !error.message?.includes('already deleted')) {
       alert(error.message || 'Failed to delete project')
     }
   } finally {
     // Always refresh the list to ensure sync with backend
-    // This handles both successful deletes and "already deleted" cases
+    console.log('🔄 Refreshing project list after delete...')
     await handleFilterChange(currentFilter.value)
+    loading.value = false
+  }
+}
     loading.value = false
   }
 }

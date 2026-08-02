@@ -200,7 +200,7 @@
         <div class="space-y-5">
           <TimelineItem
             label="Created"
-            :date="project.createdAt"
+            :date="project.createdAt || undefined"
             :is-first="true"
           />
           <TimelineItem

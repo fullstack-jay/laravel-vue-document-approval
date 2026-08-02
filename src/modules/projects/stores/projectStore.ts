@@ -251,8 +251,7 @@ export const useProjectStore = defineStore('projects', () => {
         currentProject.value = null
       }
 
-      // Refresh the list to ensure sync with backend
-      await fetchProjects()
+      console.log('✅ Project deleted successfully, ID:', id)
     } catch (err: any) {
       error.value = err.message || 'Failed to delete project'
       console.error('Delete project error:', err)
@@ -264,8 +263,8 @@ export const useProjectStore = defineStore('projects', () => {
         pagination.value.total = Math.max(0, pagination.value.total - 1)
 
         // Show warning instead of error
-        console.warn('Project already removed from server, updating local state')
-        // Don't throw error for this case
+        console.warn('⚠️ Project already removed from server, updating local state. ID:', id)
+        // Don't throw error for this case and DON'T refresh since backend reality is clear
         return
       }
 
