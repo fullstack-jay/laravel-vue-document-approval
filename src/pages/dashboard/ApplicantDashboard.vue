@@ -89,7 +89,7 @@
                 <div class="flex-1 h-8 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
                   <div
                     class="h-full bg-primary-500 transition-all duration-500"
-                    :style="{ width: `${(item.count / 20) * 100}%` }"
+                    :style="{ width: `${getMaxCount() > 0 ? (item.count / getMaxCount()) * 100 : 0}%` }"
                   />
                 </div>
                 <span class="w-8 text-sm font-medium text-gray-900 dark:text-gray-100">{{ item.count }}</span>
@@ -191,14 +191,27 @@ const statusChart = computed(() => {
   }
 })
 
-const monthlyData = [
-  { month: 'Jan', count: 8 },
-  { month: 'Feb', count: 12 },
-  { month: 'Mar', count: 15 },
-  { month: 'Apr', count: 10 },
-  { month: 'May', count: 18 },
-  { month: 'Jun', count: 20 },
-]
+const monthlyData = computed(() => {
+  const data = dashboardStore.monthlySubmissions || []
+
+  // Transform backend data if needed
+  return data.length > 0
+    ? data
+    : [
+        { month: 'Jan', count: 0 },
+        { month: 'Feb', count: 0 },
+        { month: 'Mar', count: 0 },
+        { month: 'Apr', count: 0 },
+        { month: 'May', count: 0 },
+        { month: 'Jun', count: 0 },
+      ]
+})
+
+// Get max count for bar chart scaling
+function getMaxCount() {
+  const counts = monthlyData.value.map((item) => item.count)
+  return Math.max(...counts, 1) // Minimum 1 to avoid division by zero
+}
 
 onMounted(async () => {
   setLoading(true)
