@@ -111,9 +111,12 @@ function formatDate(dateString: string): string {
     } else if (diffInDays < 7) {
       return `${diffInDays} days ago`
     } else if (diffInDays < 30) {
-    return `${Math.floor(diffInDays / 7)} weeks ago`
-  } else {
-    return date.toLocaleDateString()
+      return `${Math.floor(diffInDays / 7)} weeks ago`
+    } else {
+      return date.toLocaleDateString()
+    }
+  } catch {
+    return 'Invalid Date'
   }
 }
 
