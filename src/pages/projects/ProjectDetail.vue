@@ -361,8 +361,20 @@ async function fetchProject() {
 
   try {
     const id = route.params.id as string
-    project.value = await projectStore.fetchProjectById(id)
-  } catch (error) {
+    console.log('Fetching project with ID:', id)
+
+    // Check if currentProject in store matches the requested ID
+    // This avoids unnecessary API call after creating a new project
+    if (projectStore.currentProject && projectStore.currentProject.id === id) {
+      console.log('Using currentProject from store:', projectStore.currentProject)
+      project.value = projectStore.currentProject
+    } else {
+      // Otherwise fetch from API
+      project.value = await projectStore.fetchProjectById(id)
+      console.log('Fetched project from API:', project.value)
+    }
+  } catch (error: any) {
+    console.error('Failed to fetch project:', error)
     // Error is handled by the store
   } finally {
     loading.value = false

@@ -260,7 +260,8 @@ async function handleSubmit() {
     // Show success message
     await showSuccessAlert('Success', 'Project created successfully!')
 
-    // Redirect to project detail
+    // The project is already stored in projectStore.currentProject
+    // So we can safely redirect to the detail page
     router.push(`/projects/${project.id}`)
   } catch (error: any) {
     await showErrorAlert('Error', error.message || 'Failed to create project')
@@ -307,6 +308,8 @@ async function handleSaveDraft() {
 
     await showSuccessAlert('Success', 'Draft saved successfully!')
 
+    // The project is already stored in projectStore.currentProject
+    // So we can safely redirect to the detail page
     router.push(`/projects/${project.id}`)
   } catch (error: any) {
     await showErrorAlert('Error', error.message || 'Failed to save draft')
