@@ -66,12 +66,19 @@ export const useProjectStore = defineStore('projects', () => {
     loading.value = true
     error.value = null
 
+    console.log('🔄 FetchProjects called with params:', params)
+
     try {
       const response = await projectService.getProjects(params)
+
+      console.log('✅ API response:', response)
+      console.log('📊 Projects count:', response.data.length)
 
       projects.value = response.data
       pagination.value = response.meta
       filter.value = params || {}
+
+      console.log('💾 Store updated, projects.value.length:', projects.value.length)
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch projects'
       console.error('Fetch projects error:', err)
@@ -108,15 +115,19 @@ export const useProjectStore = defineStore('projects', () => {
     loading.value = true
     error.value = null
 
+    console.log('🔄 Fetching project by ID:', id)
+
     try {
       currentProject.value = await projectService.getProjectById(id)
+      console.log('✅ Project fetched:', currentProject.value)
       return currentProject.value
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch project'
-      console.error('Fetch project detail error:', err)
+      console.error('❌ Fetch project error:', err)
       throw err
     } finally {
       loading.value = false
+      console.log('💾 Loading set to false')
     }
   }
 

@@ -89,7 +89,7 @@
             Documents
           </p>
           <p class="text-base font-medium text-gray-900 dark:text-white">
-            {{ project.documents.length }} file(s)
+            {{ project.documents?.length || 0 }} file(s)
           </p>
         </div>
       </div>
@@ -110,9 +110,9 @@
           Supporting Documents
         </h2>
 
-        <div v-if="project.documents.length > 0" class="space-y-3">
+        <div v-if="project.documents?.length > 0" class="space-y-3">
           <div
-            v-for="doc in project.documents"
+            v-for="doc in project.documents || []"
             :key="doc.id"
             class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600 transition-colors"
           >
@@ -154,7 +154,7 @@
 
       <!-- Review Notes Card (if any) -->
       <div
-        v-if="project.reviewNotes.length > 0"
+        v-if="project.reviewNotes?.length > 0"
         class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 mb-8"
       >
         <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6">
@@ -163,7 +163,7 @@
 
         <div class="space-y-6">
           <div
-            v-for="note in project.reviewNotes"
+            v-for="note in project.reviewNotes || []"
             :key="note.id"
             class="rounded-lg border p-6 mt-3"
             :class="getNoteClasses(note.type)"
@@ -286,13 +286,20 @@ const canDelete = computed(() => {
 
 async function fetchProject() {
   loading.value = true
+  console.log('🔄 ProjectDetail: Fetching project...')
+
   try {
     const id = route.params.id as string
+    console.log('📍 Project ID from route:', id)
+
     project.value = await projectStore.fetchProjectById(id)
+
+    console.log('✅ ProjectDetail: Project loaded', project.value)
   } catch (error) {
-    console.error('Failed to fetch project:', error)
+    console.error('❌ ProjectDetail: Failed to fetch project:', error)
   } finally {
     loading.value = false
+    console.log('💾 ProjectDetail: Loading set to false')
   }
 }
 
