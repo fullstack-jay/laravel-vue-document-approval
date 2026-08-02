@@ -1,40 +1,212 @@
-# Document Approval System - Frontend
+# Document Approval System
 
-Vue.js 3 frontend application for Document Approval Management System of Kementrian Lingkungan Hidup.
+A full-stack Document Approval Management System for Kementrian Lingkungan Hidup, built with Laravel 12 (REST API), Vue 3, and PostgreSQL.
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
+- [System Overview](#system-overview)
+- [Business Workflow](#business-workflow)
+- [Actors & Roles](#actors--roles)
+- [Technical Architecture](#technical-architecture)
+  - [Frontend (Vue.js)](#frontend-vuejs)
+  - [Backend (Laravel)](#backend-laravel)
 - [Getting Started](#getting-started)
+- [API Documentation](#api-documentation)
 - [Development Guidelines](#development-guidelines)
-- [Code Standards](#code-standards)
-- [API Integration](#api-integration)
-- [State Management](#state-management)
-- [Components](#components)
-- [Routing](#routing)
-- [Styling](#styling)
-- [Backend Integration](#backend-integration)
+- [License](#license)
 
-## Overview
+---
 
-This is a modern Vue.js 3 application built with TypeScript, Vite, and Tailwind CSS. It provides a document approval workflow system for the Ministry of Environment.
+## System Overview
+
+This Document Approval System enables applicants to submit document requests and reviewers to evaluate them through a structured approval workflow. The system is designed to be scalable, secure, and optimized for handling large datasets (10,000+ applications, 2,000+ users).
 
 ### Key Features
 
-- **User Authentication**: Login, registration, password reset
-- **Role-based Access**: Applicant, Reviewer, and Admin roles
-- **Project Management**: Create, edit, submit, and track document submissions
-- **Review Workflow**: Reviewers can approve, reject, or request revisions
-- **File Management**: Upload and manage supporting documents (PDF, Excel only)
-- **Notifications**: Real-time notification system with auto-delete on click
+- **User Authentication**: Login, registration, password reset with Laravel Sanctum
+- **Role-based Access**: Applicant, Reviewer, and Admin roles with Spatie Permissions
+- **Complete Workflow**: Draft → Submitted → Review → Approved/Revision/Rejected
+- **File Management**: Upload and manage supporting documents (PDF, DOC, DOCX, Excel; max 10MB)
+- **Audit Trail**: Complete history logging for all actions
+- **Notifications**: Real-time notification system
 - **Export**: Export projects to PDF and Excel formats
+- **Dashboard Analytics**: Statistics and charts for both roles
 - **Dark Mode**: Full dark mode support
 - **Responsive Design**: Mobile-first responsive UI
-- **SweetAlert2**: Beautiful alert dialogs and confirmations
 
-## Tech Stack
+---
+
+## Business Workflow
+
+### Workflow Steps
+
+The document approval process follows these stages:
+
+```
+Draft → Submitted → Review → Approved/Revision/Rejected
+```
+
+#### Step 1: Document Preparation
+Applicant prepares all required documents offline.
+
+#### Step 2: Authentication
+- If no account exists: **Register**
+- Otherwise: **Login**
+
+#### Step 3: Create Project
+- Applicant creates a new Project/Application
+- Initial status: **Draft**
+- Applicant can edit data, upload files, save draft
+- Draft applications are **not visible** to reviewers
+
+#### Step 4: Submit Application
+- Status changes: **Draft** → **Submitted**
+- Reviewer can now see the application
+- Applicant can no longer edit data directly
+
+#### Step 5: Review
+- Reviewer receives notification
+- Reviewer opens and checks the application
+- Reviewer writes review notes
+
+#### Step 6: Decision
+
+**A. Approved**
+```
+Submitted → Approved
+```
+- Generate approval record
+- Application becomes read-only
+- Applicant receives notification
+- Workflow ends
+
+**B. Revision Required**
+```
+Submitted → Revision → Submitted (after resubmission)
+```
+- Reviewer must write revision notes
+- Applicant receives notification
+- Applicant edits and resubmits
+- Application returns to reviewer
+- This cycle may repeat multiple times
+
+**C. Rejected**
+```
+Submitted → Rejected
+```
+- Reviewer writes rejection reason
+- Applicant receives notification
+- Application permanently closed
+- Applicant must create new application if needed
+
+### Status Flow Diagram
+
+```
+┌─────────┐
+│  Draft  │
+└────┬────┘
+     │ Submit
+     ▼
+┌──────────┐     ┌──────────┐
+│ Submitted │────▶│ Revision  │
+└────┬─────┘     └─────┬────┘
+     │ Review           │ Resubmit
+     ▼                  │
+┌─────────┐             │
+│ Review  │◀────────────┘
+└────┬────┘
+     │ Decision
+     ├──────────┬────────────┐
+     ▼          ▼            ▼
+┌─────────┐ ┌───────┐ ┌──────────┐
+│ Approved│ │Revision│ │ Rejected │
+└─────────┘ └───────┘ └──────────┘
+```
+
+---
+
+## Actors & Roles
+
+### 1. Applicant (Pemohon)
+
+**Responsibilities:**
+- Register account
+- Login to system
+- Create projects/applications
+- Upload supporting documents
+- Edit applications while in Draft status
+- Submit applications for review
+- Receive revision requests
+- Update and resubmit applications
+- Receive approval/rejection notifications
+
+**Features:**
+- Authentication (Login, Register, Logout)
+- Personal Dashboard
+- Create Project
+- Upload Documents
+- Save Draft
+- Submit Application
+- View Status
+- View Review Notes
+- View Revision History
+- View Notifications
+
+**Permissions:**
+- ✅ Create application
+- ✅ Edit Draft
+- ✅ Upload files
+- ✅ View own applications
+- ✅ View status
+- ✅ View revision history
+- ✅ View review notes
+- ❌ Approve
+- ❌ Reject
+- ❌ Review other applications
+- ❌ Edit Submitted application
+
+### 2. Reviewer (Penilai)
+
+**Responsibilities:**
+- Login to system
+- View submitted applications queue
+- Review documents and applications
+- Add review notes
+- Request revisions with notes
+- Approve applications
+- Reject applications with reasons
+- View review history
+
+**Features:**
+- Authentication (Login, Logout)
+- Reviewer Dashboard
+- View Submitted Applications
+- Review Documents
+- Add Notes
+- Approve
+- Reject
+- Request Revision
+- View Review History
+- Dashboard Analytics
+
+**Permissions:**
+- ✅ View submitted applications
+- ✅ Review
+- ✅ Approve
+- ✅ Reject
+- ✅ Request revision
+- ✅ Write notes
+- ✅ View history
+- ❌ Edit applicant data
+- ❌ Create application
+
+---
+
+## Technical Architecture
+
+### Frontend (Vue.js)
+
+#### Tech Stack
 
 | Category | Technology | Version |
 |----------|-----------|---------|
@@ -47,123 +219,39 @@ This is a modern Vue.js 3 application built with TypeScript, Vite, and Tailwind 
 | **Icons** | Heroicons | 24/outline |
 | **HTTP Client** | Axios | 1.x |
 | **Alerts** | SweetAlert2 | 11.x |
-| **Date Handling** | Native (custom WIB formatters) |
 
-## Project Structure
+#### Project Structure
 
 ```
 src/
 ├── assets/              # Static assets (images, fonts)
 ├── components/          # Reusable Vue components
 │   ├── common/         # Common UI components
-│   │   ├── AppButton.vue
-│   │   ├── AppInput.vue
-│   │   ├── Card.vue
-│   │   ├── EmptyState.vue
-│   │   ├── LoadingSkeleton.vue
-│   │   ├── PageHeader.vue
-│   │   └── StatusBadge.vue
 │   ├── dashboard/      # Dashboard-specific components
-│   │   ├── ActivityCard.vue
-│   │   ├── ActivityList.vue
-│   │   └── StatisticCard.vue
 │   ├── layout/         # Layout components
-│   │   ├── LayoutWrapper.vue
-│   │   ├── Logo.vue
-│   │   ├── Navbar.vue
-│   │   ├── Sidebar.vue
-│   │   └── SidebarLink.vue
 │   ├── notifications/  # Notification components
-│   │   └── NotificationBell.vue
 │   └── projects/       # Project-related components
-│       ├── ProjectCard.vue
-│       └── TimelineItem.vue
 ├── composables/        # Vue composables (reusable logic)
-│   ├── useDarkMode.ts
-│   ├── useFileExport.ts
-│   └── useSweetAlert.ts
 ├── layouts/            # Page layout wrappers
-│   ├── AppLayout.vue
-│   └── AuthLayout.vue
 ├── modules/            # Feature modules (domain-driven)
 │   ├── auth/          # Authentication module
-│   │   ├── services/
-│   │   │   └── authService.ts
-│   │   ├── stores/
-│   │   │   └── authStore.ts
-│   │   └── types/
-│   │       └── auth.ts
 │   ├── dashboard/     # Dashboard module
-│   │   ├── services/
-│   │   ├── stores/
-│   │   └── types/
 │   ├── notifications/ # Notifications module
-│   │   ├── services/
-│   │   ├── stores/
-│   │   └── types/
 │   ├── profile/       # Profile module
-│   │   ├── services/
-│   │   ├── stores/
-│   │   └── types/
 │   └── projects/      # Projects module
-│       ├── services/
-│       │   └── projectService.ts
-│       ├── stores/
-│       │   └── projectStore.ts
-│       └── types/
-│           └── project.ts
 ├── pages/              # Page components
-│   ├── auth/          # Authentication pages
-│   │   ├── ForgotPassword.vue
-│   │   ├── Login.vue
-│   │   ├── Register.vue
-│   │   └── ResetPassword.vue
-│   ├── dashboard/     # Dashboard pages
-│   │   ├── ApplicantDashboard.vue
-│   │   └── ReviewerDashboard.vue
-│   ├── notifications/ # Notification pages
-│   │   └── Notifications.vue
-│   ├── profile/       # Profile pages
-│   │   └── Profile.vue
-│   ├── projects/      # Project pages
-│   │   ├── CreateProject.vue
-│   │   ├── EditProject.vue
-│   │   ├── ProjectDetail.vue
-│   │   ├── ProjectList.vue
-│   │   └── ReviewerProjectDetail.vue
-│   └── NotFound.vue
 ├── router/            # Vue Router configuration
-│   └── index.ts
 ├── services/          # Shared services
-│   ├── api/          # HTTP client setup
-│   │   └── http.ts
-│   └── mock/         # Mock data for development
-│       ├── authData.ts
-│       ├── dashboardData.ts
-│       └── projectData.ts
 ├── types/             # Global TypeScript types
-│   ├── common.ts
-│   └── index.ts
 ├── utils/             # Utility functions
 ├── App.vue            # Root component
 └── main.ts            # Application entry point
 ```
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 22.x or higher
-- npm or yarn package manager
-- Laravel backend API running on port 8000
-
-### Installation
+#### Frontend Getting Started
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-
-# Navigate to project directory
+# Navigate to frontend directory
 cd laravel-vue-document-approval
 
 # Install dependencies
@@ -171,9 +259,12 @@ npm install
 
 # Start development server
 npm run dev
+
+# Build for production
+npm run build
 ```
 
-### Environment Variables
+#### Environment Variables (Frontend)
 
 Create a `.env` file in the root directory:
 
@@ -181,394 +272,128 @@ Create a `.env` file in the root directory:
 VITE_API_BASE_URL=http://127.0.0.1:8000
 ```
 
-## Development Guidelines
+---
 
-### File Naming Conventions
+### Backend (Laravel)
 
-- **Components**: PascalCase (e.g., `ProjectCard.vue`, `AppButton.vue`)
-- **Composables**: camelCase with `use` prefix (e.g., `useFileExport.ts`, `useSweetAlert.ts`)
-- **Services**: camelCase (e.g., `authService.ts`, `projectService.ts`)
-- **Stores**: camelCase with `Store` suffix (e.g., `authStore.ts`, `projectStore.ts`)
-- **Types**: camelCase (e.g., `auth.ts`, `project.ts`)
-- **Pages**: PascalCase (e.g., `ProjectDetail.vue`, `Login.vue`)
+#### Tech Stack
 
-### Component Structure
+| Category | Technology | Version |
+|----------|-----------|---------|
+| **Framework** | Laravel | 12.x |
+| **Database** | PostgreSQL | 15+ |
+| **Authentication** | Laravel Sanctum | - |
+| **Authorization** | Spatie Permission | - |
+| **Cache** | Redis | - |
+| **Queue** | Redis Queue | - |
+| **API Documentation** | OpenAPI/Swagger | - |
 
-Each component should follow this structure:
+#### REST API Modules
 
-```vue
-<template>
-  <!-- Component template -->
-</template>
+- **Authentication**: Login, Register, Logout
+- **Projects**: CRUD operations for projects
+- **Documents**: File upload/download
+- **Reviews**: Review management
+- **Approvals**: Approval workflow
+- **Revisions**: Revision requests
+- **Users**: User management
+- **Dashboard**: Analytics data
+- **Logs**: Audit trail
+- **Notifications**: Notification system
 
-<script setup lang="ts">
-/**
- * ComponentName Component
- *
- * Brief description of what this component does.
- *
- * @example
- * <ComponentName prop="value" />
- */
+#### Database Tables
 
-// Imports
-import { ref, computed, onMounted } from 'vue'
-import type { SomeType } from '@/types'
-
-// Props interface
-interface Props {
-  propOne: string
-  propTwo?: number
-}
-
-// Props definition
-const props = withDefaults(defineProps<Props>(), {
-  propTwo: 0
-})
-
-// Emits definition
-interface Emits {
-  (e: 'event-name', value: string): void
-}
-
-const emit = defineEmits<Emits>()
-
-// State
-const state = ref('initial')
-
-// Computed
-const computedValue = computed(() => {
-  // Logic
-})
-
-// Methods
-const handleAction = () => {
-  // Logic
-}
-
-// Lifecycle
-onMounted(() => {
-  // Initialization
-})
-</script>
-
-<style scoped>
-/* Component-specific styles */
-</style>
+```
+users
+roles
+permissions
+projects
+applications
+application_documents
+reviews
+review_notes
+approval_logs
+notifications
+activity_logs
 ```
 
-### Composable Pattern
-
-Composables should be reusable and follow this pattern:
-
-```typescript
-/**
- * useComposableName
- *
- * Description of what this composable does.
- *
- * @module composables/useComposableName
- *
- * @example
- * ```typescript
- * const { value, method } = useComposableName()
- * ```
- */
-
-import { ref, computed, type Ref } from 'vue'
-
-// Type definitions
-interface ComposableState {
-  // State properties
-}
-
-// Main composable function
-export function useComposableName() {
-  // State
-  const state: Ref<ComposableState> = ref(defaultValue)
-
-  // Computed
-  const computedValue = computed(() => {
-    // Logic
-  })
-
-  // Methods
-  const method = () => {
-    // Logic
-  }
-
-  // Return public API
-  return {
-    state,
-    computedValue,
-    method,
-  }
-}
-```
-
-## Code Standards
-
-### PSR-12 Compliance for TypeScript
-
-This project follows PSR-12 coding standards adapted for TypeScript:
-
-1. **Indentation**: 2 spaces (no tabs)
-2. **Line Length**: Maximum 120 characters
-3. **Blank Lines**: 
-   - One blank line after imports
-   - One blank line between functions
-4. **Spacing**: 
-   - Spaces around operators (`a = b + c`)
-   - Spaces after commas in function calls
-5. **Braces**: Opening brace on same line
-6. **Naming**: 
-   - Classes/Types: PascalCase
-   - Functions/Variables: camelCase
-   - Constants: UPPER_SNAKE_CASE
-
-### TypeScript Guidelines
-
-1. **Always use types**: Avoid `any` whenever possible
-2. **Use type imports**: `import type { ... }` for type-only imports
-3. **Define interfaces** for complex objects
-4. **Use generics** when appropriate
-5. **Add JSDoc comments** for exported functions
-
-```typescript
-// Good
-import type { User, Project } from '@/types'
-
-interface FetchProjectsOptions {
-  page?: number
-  status?: ProjectStatus
-}
-
-async function fetchProjects(options?: FetchProjectsOptions): Promise<Project[]> {
-  // Implementation
-}
-
-// Avoid
-async function fetchProjects(options?: any): Promise<any> {
-  // Implementation
-}
-```
-
-### Vue 3 Best Practices
-
-1. **Use Composition API** with `<script setup>`
-2. **Prefer composables** over mixins
-3. **Use refs and reactives** appropriately
-4. **Computed properties** for derived state
-5. **Watch effects** sparingly
-
-### Naming Conventions
-
-- **Variables**: camelCase (e.g., `projectList`, `isLoading`)
-- **Constants**: UPPER_SNAKE_CASE (e.g., `API_BASE_URL`)
-- **Functions**: camelCase with verb prefix (e.g., `handleSubmit`, `fetchData`)
-- **Types/Interfaces**: PascalCase (e.g., `Project`, `User`)
-- **Booleans**: Prefix with `is/has/can` (e.g., `isLoading`, `hasAccess`)
-
-### Comment Guidelines
-
-```typescript
-/**
- * Function description
- *
- * Detailed explanation if needed.
- *
- * @param paramOne - Description of first parameter
- * @param paramTwo - Description of second parameter
- * @returns Description of return value
- *
- * @example
- * ```typescript
- * const result = functionName(arg1, arg2)
- * ```
- */
-```
-
-## API Integration
-
-### HTTP Client
-
-The application uses Axios with interceptors for authentication:
-
-```typescript
-// services/api/http.ts
-- Request interceptor adds Bearer token
-- Response interceptor handles 401 errors
-- Base URL from environment variable
-```
-
-### Service Pattern
-
-Each module has its own service:
-
-```typescript
-// modules/auth/services/authService.ts
-export const authService = {
-  async login(credentials: LoginCredentials): Promise<AuthResponse>,
-  async register(data: RegisterData): Promise<AuthResponse>,
-  async logout(): Promise<void>,
-}
-```
-
-### Error Handling
-
-All API calls should be wrapped in try-catch:
-
-```typescript
-try {
-  const response = await service.someMethod()
-  // Handle success
-} catch (error: any) {
-  const message = error.response?.data?.message || error.message
-  // Handle error
-  await showErrorAlert('Error', message)
-}
-```
-
-## State Management
-
-### Pinia Stores
-
-Each feature module has its own store:
-
-```typescript
-// modules/projects/stores/projectStore.ts
-export const useProjectStore = defineStore('project', () => {
-  // State
-  const projects = ref<Project[]>([])
-  const loading = ref(false)
-
-  // Actions
-  async function fetchProjects() {
-    // Implementation
-  }
-
-  // Getters
-  const filteredProjects = computed(() => {
-    // Computed logic
-  })
-
-  return {
-    projects,
-    loading,
-    fetchProjects,
-    filteredProjects,
-  }
-})
-```
-
-## Components
-
-### Common Components
-
-Reusable UI components in `src/components/common/`:
-
-- `AppButton.vue` - Standardized button with loading states
-- `AppInput.vue` - Form input with validation
-- `Card.vue` - Card container component
-- `PageHeader.vue` - Page header with actions
-- `StatusBadge.vue` - Status badge component
-- `LoadingSkeleton.vue` - Skeleton loader
-- `EmptyState.vue` - Empty state placeholder
-
-### Component Props
-
-Always define prop types:
-
-```typescript
-interface Props {
-  title: string
-  status: ProjectStatus
-  size?: 'sm' | 'md' | 'lg'
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  size: 'md'
-})
-```
-
-## Routing
-
-### Route Structure
-
-```typescript
-// Public routes
-/login              - Login page
-/register            - Registration page
-/forgot-password     - Forgot password
-
-// Protected routes (require auth)
-/dashboard           - Applicant dashboard
-/reviewer-dashboard  - Reviewer dashboard
-/projects            - Project list with pagination
-/projects/create     - Create new project
-/projects/:id        - Project detail
-/projects/:id/edit   - Edit project
-/profile             - User profile
-/notifications       - Notification list
-
-// Reviewer routes
-/projects/:id/review - Review project
-```
-
-### Route Guards
-
-Authentication guard checks for valid token:
-
-```typescript
-router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore()
-  const requiresAuth = to.meta.requiresAuth
-
-  if (requiresAuth && !authStore.isAuthenticated) {
-    next('/login')
-  } else {
-    next()
-  }
-})
-```
-
-## Styling
-
-### Tailwind CSS Configuration
-
-Primary colors and theme in `tailwind.config.js`:
-
-```javascript
-theme: {
-  extend: {
-    colors: {
-      primary: {
-        50: '#EFF6FF',
-        500: '#3B82F6',
-        600: '#2563EB',
-        700: '#1D4ED8',
-      },
-      // Status colors
-      draft: '#6B7280',
-      submitted: '#3B82F6',
-      revision: '#F59E0B',
-      approved: '#10B981',
-      rejected: '#EF4444',
-    }
-  }
-}
-```
-
-### Dark Mode
-
-Dark mode is class-based and can be toggled via `useDarkMode` composable.
-
-## Backend Integration
-
-This frontend is designed to work with a Laravel backend. See:
-
-- **`BACKEND_REGISTRATION_GUIDE.md`** - User registration API implementation
-- **`BACKEND_EXPORT_GUIDE.md`** - PDF/Excel export API implementation
+#### File Upload Rules
+
+- **Supported Formats**: PDF, DOC, DOCX, Excel
+- **Maximum Size**: 10 MB per file
+- **Access Control**: Only owner and reviewer can access files
+
+#### Performance Optimization
+
+- Indexing for fast queries
+- Eager loading to prevent N+1 queries
+- Pagination for large datasets
+- Redis caching for frequently accessed data
+- Queue jobs for heavy operations
+
+#### Security Features
+
+- Laravel Sanctum for API authentication
+- Spatie Permission for role-based access control
+- Policies for authorization
+- Input validation with Form Requests
+- CSRF protection
+- SQL injection protection
+- File validation
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- **Backend**: PHP 8.2+, Composer, PostgreSQL, Redis
+- **Frontend**: Node.js 22.x or higher, npm or yarn
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd laravel-vue-document-approval
+   ```
+
+2. **Install backend dependencies**
+   ```bash
+   composer install
+   ```
+
+3. **Configure environment**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+4. **Setup database**
+   ```bash
+   # Create PostgreSQL database
+   createdb doc_approval
+
+   # Run migrations
+   php artisan migrate
+
+   # Seed database (optional)
+   php artisan db:seed
+   ```
+
+5. **Install frontend dependencies**
+   ```bash
+   npm install
+   ```
+
+6. **Start services**
+   ```bash
+   # Backend
+   php artisan serve
+
+   # Frontend (new terminal)
+   npm run dev
+   ```
 
 ### Demo Credentials
 
@@ -579,24 +404,74 @@ This frontend is designed to work with a Laravel backend. See:
 **Registration:**
 - New users are automatically assigned `applicant` role
 
-## Available Scripts
+---
+
+## API Documentation
+
+For detailed API documentation, see [API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md)
+
+### Base URL
+
+```
+http://127.0.0.1:8000/api/v1
+```
+
+### Authentication
+
+All protected endpoints require Bearer token authentication:
+
+```
+Authorization: Bearer {token}
+```
+
+### Key Endpoints
+
+| Module | Endpoints |
+|--------|-----------|
+| **Auth** | POST /auth/login, POST /auth/register, POST /auth/logout |
+| **Projects** | GET /projects, POST /projects, GET /projects/{id}, DELETE /projects/{id} |
+| **Documents** | POST /projects/{projectId}/documents, DELETE /documents/{id} |
+| **Reviewer** | GET /reviewer/projects, POST /reviewer/projects/{id}/approve |
+| **Export** | GET /export/projects/{id}/pdf, GET /export/projects/excel |
+| **Notifications** | GET /notifications, PUT /notifications/{id}/read |
+
+---
+
+## Development Guidelines
+
+### File Naming Conventions
+
+- **Components**: PascalCase (e.g., `ProjectCard.vue`, `AppButton.vue`)
+- **Composables**: camelCase with `use` prefix (e.g., `useFileExport.ts`)
+- **Services**: camelCase (e.g., `authService.ts`)
+- **Stores**: camelCase with `Store` suffix (e.g., `authStore.ts`)
+
+### Code Standards
+
+- **Indentation**: 2 spaces (no tabs)
+- **Line Length**: Maximum 120 characters
+- **TypeScript**: Avoid `any`, use type imports
+- **Vue**: Use Composition API with `<script setup>`
+- **Naming**:
+  - Variables: camelCase
+  - Constants: UPPER_SNAKE_CASE
+  - Functions: camelCase with verb prefix
+  - Types/Interfaces: PascalCase
+
+### Testing
 
 ```bash
-# Development
-npm run dev
+# Backend tests
+php artisan test
 
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-
-# Type checking
+# Frontend type checking
 npm run type-check
 
-# Linting
+# Frontend linting
 npm run lint
 ```
+
+---
 
 ## License
 
