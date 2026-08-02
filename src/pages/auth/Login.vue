@@ -110,11 +110,10 @@
       <!-- Demo credentials hint -->
       <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
         <p class="text-sm text-blue-800 dark:text-blue-300 font-medium mb-2">
-          Demo Credentials:
+          Reviewer Credentials:
         </p>
         <div class="text-xs text-blue-600 dark:text-blue-400 space-y-1">
-          <p>Applicant: applicant@example.com / password123</p>
-          <p>Reviewer: reviewer@example.com / password123</p>
+          <p>Reviewer: reviewer@example.com / password</p>
         </div>
       </div>
 
