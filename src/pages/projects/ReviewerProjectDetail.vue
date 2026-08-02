@@ -353,11 +353,43 @@
             label="Submitted"
             :date="project.submittedAt || project.submitted_at"
           />
-          <TimelineItem
-            v-if="project.reviewedAt || project.reviewed_at"
-            label="Reviewed"
-            :date="project.reviewedAt || project.reviewed_at"
-          />
+          <!-- Review Notes in Timeline -->
+          <div
+            v-for="note in project.reviewNotes"
+            :key="note.id"
+            class="flex items-start space-x-4"
+          >
+            <!-- Icon -->
+            <div class="flex-shrink-0">
+              <div
+                class="w-10 h-10 rounded-full flex items-center justify-center"
+                :class="getNoteIconBgClass(note.type)"
+              >
+                <CommentIcon class="h-5 w-5" :class="getNoteIconClass(note.type)" />
+              </div>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <p class="text-sm font-medium text-gray-900 dark:text-white">
+                  {{ note.reviewerName }}
+                </p>
+                <span
+                  class="px-2 py-0.5 text-xs font-medium rounded-full"
+                  :class="getNoteBadgeClasses(note.type)"
+                >
+                  {{ note.type }}
+                </span>
+              </div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {{ note.note }}
+              </p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {{ formatDate(note.createdAt) }}
+              </p>
+            </div>
+          </div>
           <TimelineItem
             v-if="project.approvedAt || project.approved_at"
             label="Approved"
@@ -405,6 +437,7 @@ import {
   ArrowPathIcon,
   XCircleIcon,
   InformationCircleIcon,
+  ChatBubbleLeftRightIcon as CommentIcon,
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
@@ -530,18 +563,25 @@ function formatDate(dateString: string | undefined): string {
   if (!dateString) return 'Invalid Date'
 
   try {
-    const date = new Date(dateString)
-    if (isNaN(date.getTime())) return 'Invalid Date'
+    // Parse the datetime string directly without timezone conversion
+    // Backend sends in WIB format: "2026-08-02 06:38:45"
+    const dateMatch = dateString.match(/(\d{4})-(\d{2})-(\d{2})[\sT](\d{2}):(\d{2}):(\d{2})/)
 
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
+    if (dateMatch) {
+      const [, year, month, day, hour, minute] = dateMatch
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+      const monthName = monthNames[parseInt(month) - 1]
+      const hour24 = parseInt(hour)
+
+      return `${monthName} ${parseInt(day)}, ${year}, ${hour24.toString().padStart(2, '0')}:${minute} WIB`
+    }
+
+    // Fallback for other formats
+    return dateString
   } catch {
-    return 'Invalid Date'
+    return dateString || 'Invalid Date'
   }
 }
 
@@ -580,6 +620,26 @@ function getNoteBadgeClasses(type: string): string {
     revision: 'bg-orange-100/80 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300 border-orange-200 dark:border-orange-700',
     approval: 'bg-green-100/80 text-green-700 dark:bg-green-900/50 dark:text-green-300 border-green-200 dark:border-green-700',
     rejection: 'bg-rose-100/80 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300 border-rose-200 dark:border-rose-700',
+  }
+  return classes[type] || classes.info
+}
+
+function getNoteIconBgClass(type: string): string {
+  const classes: Record<string, string> = {
+    info: 'bg-blue-100 dark:bg-blue-900/30',
+    revision: 'bg-orange-100 dark:bg-orange-900/30',
+    approval: 'bg-green-100 dark:bg-green-900/30',
+    rejection: 'bg-rose-100 dark:bg-rose-900/30',
+  }
+  return classes[type] || classes.info
+}
+
+function getNoteIconClass(type: string): string {
+  const classes: Record<string, string> = {
+    info: 'text-blue-600 dark:text-blue-400',
+    revision: 'text-orange-600 dark:text-orange-400',
+    approval: 'text-green-600 dark:text-green-400',
+    rejection: 'text-rose-600 dark:text-rose-400',
   }
   return classes[type] || classes.info
 }
