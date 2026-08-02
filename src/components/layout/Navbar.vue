@@ -36,16 +36,7 @@
           </button>
 
           <!-- Notifications -->
-          <button
-            class="p-2 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors relative"
-            title="Notifications"
-          >
-            <BellIcon class="w-5 h-5" />
-            <span
-              v-if="unreadCount > 0"
-              class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"
-            />
-          </button>
+          <NotificationBell />
 
           <!-- Profile dropdown -->
           <div class="relative" ref="profileDropdownRef">
@@ -99,7 +90,6 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/modules/auth/stores/authStore'
 import { useDarkMode } from '@/composables/useDarkMode'
 import {
-  BellIcon,
   MoonIcon,
   SunIcon,
   ChevronDownIcon,
@@ -107,6 +97,7 @@ import {
   ArrowRightOnRectangleIcon,
   Bars3Icon,
 } from '@heroicons/vue/24/outline'
+import NotificationBell from '@/components/notifications/NotificationBell.vue'
 import defaultLogo from '@/assets/images/logo-klh.webp'
 
 // Props & Emits
@@ -127,7 +118,6 @@ const { isDark, toggleDarkMode } = useDarkMode()
 const user = computed(() => authStore.user)
 const showProfileMenu = ref(false)
 const profileDropdownRef = ref<HTMLElement | null>(null)
-const unreadCount = ref(3) // Mock unread notifications
 
 function toggleProfileMenu() {
   showProfileMenu.value = !showProfileMenu.value

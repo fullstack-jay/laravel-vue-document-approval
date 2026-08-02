@@ -35,10 +35,12 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     try {
       const response = await authService.login(credentials)
+
       user.value = response.user
       token.value = response.token
       localStorage.setItem('access_token', response.token)
       localStorage.setItem('user_data', JSON.stringify(response.user))
+
       return response
     } catch (err: any) {
       error.value = err.message
@@ -84,13 +86,16 @@ export const useAuthStore = defineStore('auth', () => {
 
     loading.value = true
     try {
-      user.value = await authService.getCurrentUser(token.value)
+      const userData = await authService.getCurrentUser()
+      user.value = userData
+      localStorage.setItem('user_data', JSON.stringify(userData))
     } catch (err: any) {
       error.value = err.message
       // If token is invalid, clear it
-      if (err.message?.includes('token') || err.message?.includes('auth')) {
+      if (err.response?.status === 401 || err.message?.includes('token') || err.message?.includes('auth')) {
         token.value = null
         localStorage.removeItem('access_token')
+        localStorage.removeItem('user_data')
       }
     } finally {
       loading.value = false

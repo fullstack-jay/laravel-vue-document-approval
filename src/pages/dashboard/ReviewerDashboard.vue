@@ -232,7 +232,7 @@ const approvalRate = [
 onMounted(async () => {
   setLoading(true)
   try {
-    await dashboardStore.fetchDashboardStats('reviewer')
+    await dashboardStore.fetchDashboardStats()
   } finally {
     setLoading(false)
   }

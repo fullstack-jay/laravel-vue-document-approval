@@ -308,7 +308,7 @@ const isChangingPassword = ref(false)
 async function fetchProfile() {
   loading.value = true
   try {
-    await profileStore.fetchProfile(authStore.userRole || 'applicant')
+    await profileStore.fetchProfile()
     profile.value = profileStore.profile
 
     // Populate form

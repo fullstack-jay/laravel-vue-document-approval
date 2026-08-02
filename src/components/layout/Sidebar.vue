@@ -58,6 +58,7 @@ import {
   FolderOpenIcon,
   ClipboardDocumentListIcon,
   XMarkIcon,
+  BellIcon,
 } from '@heroicons/vue/24/outline'
 import SidebarLink from './SidebarLink.vue'
 
@@ -89,11 +90,13 @@ const roleBadgeClass = computed(() => {
 const applicantMenu = [
   { name: 'Dashboard', to: '/dashboard', icon: HomeIcon },
   { name: 'My Projects', to: '/projects', icon: FolderOpenIcon },
+  { name: 'Notifications', to: '/notifications', icon: BellIcon },
 ]
 
 const reviewerMenu = [
   { name: 'Dashboard', to: '/reviewer-dashboard', icon: HomeIcon },
   { name: 'Review Queue', to: '/projects', icon: ClipboardDocumentListIcon },
+  { name: 'Notifications', to: '/notifications', icon: BellIcon },
 ]
 
 const handleLinkClick = () => {

@@ -19,11 +19,11 @@ export const useProfileStore = defineStore('profile', () => {
   const userAvatar = computed(() => profile.value?.avatar || '')
 
   // Actions
-  async function fetchProfile(role: 'applicant' | 'reviewer' | 'admin' = 'applicant') {
+  async function fetchProfile() {
     loading.value = true
     error.value = null
     try {
-      profile.value = await profileService.getProfile(role)
+      profile.value = await profileService.getProfile()
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch profile'
       throw err

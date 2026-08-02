@@ -1,4 +1,4 @@
-import { mockProjects, mockReviewerProjects, getProjectListItems } from '@/services/mock/projectData'
+import axios from 'axios'
 import type {
   Project,
   ProjectListItem,
@@ -6,48 +6,79 @@ import type {
   ProjectFilter,
   PaginatedProjects,
   ProjectStatus,
+  Document,
 } from '../types/project'
+
+// Create axios instance for project API calls
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000',
+  timeout: 15000, // Longer timeout for file uploads
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+})
+
+// Add request interceptor to include token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => Promise.reject(error)
+)
+
+// Add response interceptor to handle errors
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('user_data')
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  }
+)
 
 /**
  * Project Service - Handles all project-related operations
- * Mock API implementation for development
+ * Connected to Laravel backend API
  */
 export const projectService = {
   /**
    * Get all projects for the current user (applicant view)
    */
   async getProjects(filter?: ProjectFilter): Promise<PaginatedProjects> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500))
+    try {
+      const params: Record<string, any> = {}
 
-    let projects = [...mockProjects]
+      if (filter?.status) params.status = filter.status
+      if (filter?.category) params.category = filter.category
+      if (filter?.search) params.search = filter.search
+      if (filter?.page) params.page = filter.page
+      if (filter?.perPage) params.per_page = filter.perPage
 
-    // Apply filters
-    if (filter?.status) {
-      projects = projects.filter(p => p.status === filter.status)
-    }
-    if (filter?.category) {
-      projects = projects.filter(p => p.category === filter.category)
-    }
-    if (filter?.search) {
-      const searchLower = filter.search.toLowerCase()
-      projects = projects.filter(p =>
-        p.title.toLowerCase().includes(searchLower) ||
-        p.description.toLowerCase().includes(searchLower)
-      )
-    }
+      const response = await api.get('/api/v1/projects', { params })
 
-    // Sort by updated date (newest first)
-    projects.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-
-    return {
-      data: getProjectListItems(projects),
-      meta: {
-        currentPage: 1,
-        perPage: 10,
-        total: projects.length,
-        lastPage: Math.ceil(projects.length / 10),
-      },
+      return {
+        data: response.data.data || response.data.projects || [],
+        meta: {
+          currentPage: response.data.meta?.current_page || 1,
+          perPage: response.data.meta?.per_page || 10,
+          total: response.data.meta?.total || 0,
+          lastPage: response.data.meta?.last_page || 1,
+        },
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message ||
+                     error.response?.data?.error ||
+                     error.message ||
+                     'Failed to fetch projects'
+      throw new Error(message)
     }
   },
 
@@ -55,31 +86,31 @@ export const projectService = {
    * Get projects for reviewer (excluding draft)
    */
   async getReviewerProjects(filter?: ProjectFilter): Promise<PaginatedProjects> {
-    await new Promise(resolve => setTimeout(resolve, 500))
+    try {
+      const params: Record<string, any> = {}
 
-    let projects = [...mockReviewerProjects]
+      if (filter?.status) params.status = filter.status
+      if (filter?.search) params.search = filter.search
+      if (filter?.page) params.page = filter.page
+      if (filter?.perPage) params.per_page = filter.perPage
 
-    if (filter?.status) {
-      projects = projects.filter(p => p.status === filter.status)
-    }
-    if (filter?.search) {
-      const searchLower = filter.search.toLowerCase()
-      projects = projects.filter(p =>
-        p.title.toLowerCase().includes(searchLower) ||
-        p.description.toLowerCase().includes(searchLower)
-      )
-    }
+      const response = await api.get('/api/v1/reviewer/projects', { params })
 
-    projects.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-
-    return {
-      data: getProjectListItems(projects),
-      meta: {
-        currentPage: 1,
-        perPage: 10,
-        total: projects.length,
-        lastPage: Math.ceil(projects.length / 10),
-      },
+      return {
+        data: response.data.data || response.data.projects || [],
+        meta: {
+          currentPage: response.data.meta?.current_page || 1,
+          perPage: response.data.meta?.per_page || 10,
+          total: response.data.meta?.total || 0,
+          lastPage: response.data.meta?.last_page || 1,
+        },
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message ||
+                     error.response?.data?.error ||
+                     error.message ||
+                     'Failed to fetch reviewer projects'
+      throw new Error(message)
     }
   },
 
@@ -87,176 +118,191 @@ export const projectService = {
    * Get project detail by ID
    */
   async getProjectById(id: string): Promise<Project> {
-    await new Promise(resolve => setTimeout(resolve, 300))
-
-    const project = mockProjects.find(p => p.id === id) ||
-                   mockReviewerProjects.find(p => p.id === id)
-
-    if (!project) {
-      throw new Error('Project not found')
+    try {
+      const response = await api.get(`/api/v1/projects/${id}`)
+      return response.data.data || response.data
+    } catch (error: any) {
+      const message = error.response?.data?.message ||
+                     error.response?.data?.error ||
+                     error.message ||
+                     'Project not found'
+      throw new Error(message)
     }
+  },
 
-    return project
+  /**
+   * Get project detail for reviewer
+   */
+  async getProjectForReview(id: string): Promise<Project> {
+    try {
+      const response = await api.get(`/api/v1/reviewer/projects/${id}`)
+      return response.data.data || response.data
+    } catch (error: any) {
+      const message = error.response?.data?.message ||
+                     error.response?.data?.error ||
+                     error.message ||
+                     'Project not found'
+      throw new Error(message)
+    }
   },
 
   /**
    * Create new project
    */
   async createProject(data: ProjectFormData): Promise<Project> {
-    await new Promise(resolve => setTimeout(resolve, 800))
+    try {
+      // Create FormData for file upload
+      const formData = new FormData()
 
-    // Convert File objects to document metadata
-    const documents = data.documents.map((file, index) => ({
-      id: `doc${Date.now()}_${index}`,
-      projectId: '', // Will be set after project creation
-      fileName: file.name,
-      fileType: file.type.split('/')[1] as 'pdf' | 'doc' | 'docx',
-      fileSize: file.size,
-      uploadedAt: new Date().toISOString(),
-      url: `/documents/${file.name}`, // Mock URL
-    }))
+      formData.append('title', data.title)
+      formData.append('description', data.description)
+      formData.append('category', data.category)
 
-    const newProject: Project = {
-      id: Math.random().toString(36).substring(7),
-      userId: '1', // Mock current user ID
-      title: data.title,
-      description: data.description,
-      category: data.category,
-      status: 'draft',
-      documents,
-      reviewNotes: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      // Append documents if any
+      if (data.documents && data.documents.length > 0) {
+        data.documents.forEach((file) => {
+          formData.append('documents[]', file)
+        })
+      }
+
+      const response = await api.post('/api/v1/projects', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+
+      return response.data.data || response.data
+    } catch (error: any) {
+      const message = error.response?.data?.message ||
+                     error.response?.data?.error ||
+                     error.message ||
+                     'Failed to create project'
+      throw new Error(message)
     }
-
-    // Update project IDs in documents
-    documents.forEach(doc => {
-      doc.projectId = newProject.id
-    })
-
-    mockProjects.unshift(newProject)
-
-    return newProject
   },
 
   /**
    * Update project (only draft status)
    */
   async updateProject(id: string, data: Partial<ProjectFormData>): Promise<Project> {
-    await new Promise(resolve => setTimeout(resolve, 600))
+    try {
+      const formData = new FormData()
 
-    const projectIndex = mockProjects.findIndex(p => p.id === id)
-    if (projectIndex === -1) {
-      throw new Error('Project not found')
+      if (data.title) formData.append('title', data.title)
+      if (data.description) formData.append('description', data.description)
+      if (data.category) formData.append('category', data.category)
+
+      // Append new documents if any
+      if (data.documents && data.documents.length > 0) {
+        data.documents.forEach((file) => {
+          if (file instanceof File) {
+            formData.append('documents[]', file)
+          }
+        })
+      }
+
+      const response = await api.post(`/api/v1/projects/${id}?_method=PUT`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+
+      return response.data.data || response.data
+    } catch (error: any) {
+      const message = error.response?.data?.message ||
+                     error.response?.data?.error ||
+                     error.message ||
+                     'Failed to update project'
+      throw new Error(message)
     }
-
-    const project = mockProjects[projectIndex]
-
-    if (project.status !== 'draft') {
-      throw new Error('Can only edit draft projects')
-    }
-
-    // Update fields
-    if (data.title) project.title = data.title
-    if (data.description) project.description = data.description
-    if (data.category) project.category = data.category
-    project.updatedAt = new Date().toISOString()
-
-    mockProjects[projectIndex] = project
-
-    return project
   },
 
   /**
    * Submit project for review
    */
   async submitProject(id: string): Promise<Project> {
-    await new Promise(resolve => setTimeout(resolve, 800))
-
-    const projectIndex = mockProjects.findIndex(p => p.id === id)
-    if (projectIndex === -1) {
-      throw new Error('Project not found')
+    try {
+      const response = await api.post(`/api/v1/projects/${id}/submit`)
+      return response.data.data || response.data
+    } catch (error: any) {
+      const message = error.response?.data?.message ||
+                     error.response?.data?.error ||
+                     error.message ||
+                     'Failed to submit project'
+      throw new Error(message)
     }
-
-    const project = mockProjects[projectIndex]
-
-    if (project.status !== 'draft' && project.status !== 'revision') {
-      throw new Error('Can only submit draft or revision projects')
-    }
-
-    project.status = 'submitted'
-    project.submittedAt = new Date().toISOString()
-    project.updatedAt = new Date().toISOString()
-
-    mockProjects[projectIndex] = project
-
-    return project
   },
 
   /**
    * Delete project (only draft status)
    */
   async deleteProject(id: string): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 400))
-
-    const projectIndex = mockProjects.findIndex(p => p.id === id)
-    if (projectIndex === -1) {
-      throw new Error('Project not found')
+    try {
+      await api.delete(`/api/v1/projects/${id}`)
+    } catch (error: any) {
+      const message = error.response?.data?.message ||
+                     error.response?.data?.error ||
+                     error.message ||
+                     'Failed to delete project'
+      throw new Error(message)
     }
-
-    const project = mockProjects[projectIndex]
-
-    if (project.status !== 'draft') {
-      throw new Error('Can only delete draft projects')
-    }
-
-    mockProjects.splice(projectIndex, 1)
   },
 
   /**
    * Upload document to project
    */
-  async uploadDocument(projectId: string, file: File): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 1000))
+  async uploadDocument(projectId: string, file: File): Promise<Document> {
+    try {
+      const formData = new FormData()
+      formData.append('document', file)
 
-    // Mock upload - in real implementation, would upload to server
-    console.log(`Uploading file ${file.name} to project ${projectId}`)
+      const response = await api.post(`/api/v1/projects/${projectId}/documents`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+
+      return response.data.data || response.data
+    } catch (error: any) {
+      const message = error.response?.data?.message ||
+                     error.response?.data?.error ||
+                     error.message ||
+                     'Failed to upload document'
+      throw new Error(message)
+    }
   },
 
   /**
    * Delete document from project
    */
   async deleteDocument(projectId: string, documentId: string): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 400))
-
-    const project = mockProjects.find(p => p.id === projectId)
-    if (!project) {
-      throw new Error('Project not found')
+    try {
+      await api.delete(`/api/v1/documents/${documentId}`)
+    } catch (error: any) {
+      const message = error.response?.data?.message ||
+                     error.response?.data?.error ||
+                     error.message ||
+                     'Failed to delete document'
+      throw new Error(message)
     }
-
-    project.documents = project.documents.filter(d => d.id !== documentId)
   },
 
   /**
    * Add review note (reviewer only)
    */
   async addReviewNote(projectId: string, note: string, type: 'revision' | 'approval' | 'rejection'): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 500))
-
-    const project = mockReviewerProjects.find(p => p.id === projectId)
-    if (!project) {
-      throw new Error('Project not found')
+    try {
+      await api.post(`/api/v1/reviewer/projects/${projectId}/notes`, {
+        note,
+        type,
+      })
+    } catch (error: any) {
+      const message = error.response?.data?.message ||
+                     error.response?.data?.error ||
+                     error.message ||
+                     'Failed to add review note'
+      throw new Error(message)
     }
-
-    project.reviewNotes.push({
-      id: Math.random().toString(36).substring(7),
-      projectId,
-      reviewerId: '2', // Mock reviewer ID
-      reviewerName: 'Reviewer User',
-      note,
-      type,
-      createdAt: new Date().toISOString(),
-    })
   },
 
   /**
@@ -267,42 +313,27 @@ export const projectService = {
     status: ProjectStatus,
     note?: string
   ): Promise<Project> {
-    await new Promise(resolve => setTimeout(resolve, 600))
+    try {
+      let endpoint = `/api/v1/reviewer/projects/${id}`
 
-    const projectIndex = mockReviewerProjects.findIndex(p => p.id === id)
-    if (projectIndex === -1) {
-      throw new Error('Project not found')
+      // Determine the appropriate endpoint based on status
+      if (status === 'approved') {
+        endpoint = `/api/v1/reviewer/projects/${id}/approve`
+      } else if (status === 'rejected') {
+        endpoint = `/api/v1/reviewer/projects/${id}/reject`
+      } else if (status === 'revision') {
+        endpoint = `/api/v1/reviewer/projects/${id}/request-revision`
+      }
+
+      const response = await api.post(endpoint, note ? { note } : {})
+
+      return response.data.data || response.data
+    } catch (error: any) {
+      const message = error.response?.data?.message ||
+                     error.response?.data?.error ||
+                     error.message ||
+                     'Failed to update project status'
+      throw new Error(message)
     }
-
-    const project = mockReviewerProjects[projectIndex]
-    const now = new Date().toISOString()
-
-    project.status = status
-    project.reviewedAt = now
-    project.updatedAt = now
-
-    if (status === 'approved') {
-      project.approvedAt = now
-    } else if (status === 'rejected') {
-      project.rejectedAt = now
-    }
-
-    // Add review note if provided
-    if (note) {
-      const noteType = status === 'approved' ? 'approval' : status === 'rejected' ? 'rejection' : 'revision'
-      project.reviewNotes.push({
-        id: Math.random().toString(36).substring(7),
-        projectId: id,
-        reviewerId: '2',
-        reviewerName: 'Reviewer User',
-        note,
-        type: noteType,
-        createdAt: now,
-      })
-    }
-
-    mockReviewerProjects[projectIndex] = project
-
-    return project
   },
 }

@@ -78,10 +78,11 @@
               @change="handleFileUpload"
               class="hidden"
               id="file-upload"
+              ref="fileInputRef"
             />
             <button
               type="button"
-              @click="document.getElementById('file-upload')?.click()"
+              @click="fileInputRef?.click()"
               class="mt-4 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               Browse Files
@@ -185,6 +186,7 @@ const errors = ref<Record<string, string>>({})
 const errorMessage = ref('')
 const isSubmitting = ref(false)
 const isSavingDraft = ref(false)
+const fileInputRef = ref<HTMLInputElement | null>(null)
 
 const setLoading = inject<(value: boolean) => void>('setLoading', () => {})
 

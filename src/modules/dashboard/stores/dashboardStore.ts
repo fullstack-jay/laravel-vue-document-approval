@@ -19,13 +19,13 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const error = ref<string | null>(null)
 
   // Actions
-  async function fetchDashboardStats(role: 'applicant' | 'reviewer') {
+  async function fetchDashboardStats() {
     loading.value = true
     error.value = null
     try {
       const [statsData, activitiesData] = await Promise.all([
-        dashboardService.getStats(role),
-        dashboardService.getRecentActivities(role),
+        dashboardService.getStats(),
+        dashboardService.getRecentActivities(),
       ])
 
       stats.value = statsData

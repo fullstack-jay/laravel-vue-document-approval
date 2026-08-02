@@ -203,7 +203,7 @@ const monthlyData = [
 onMounted(async () => {
   setLoading(true)
   try {
-    await dashboardStore.fetchDashboardStats('applicant')
+    await dashboardStore.fetchDashboardStats()
   } finally {
     setLoading(false)
   }
