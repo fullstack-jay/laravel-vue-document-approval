@@ -128,6 +128,7 @@ import LoadingSkeleton from '@/components/common/LoadingSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ProjectCard from '@/components/projects/ProjectCard.vue'
 import type { ProjectStatus } from '@/modules/projects/types/project'
+import { showConfirmAlert, showErrorAlert } from '@/composables/useSweetAlert'
 
 const router = useRouter()
 const projectStore = useProjectStore()
@@ -291,7 +292,12 @@ function handleEditProject(id: string) {
 }
 
 async function handleDeleteProject(id: string) {
-  if (!confirm('Are you sure you want to delete this project?')) {
+  const result = await showConfirmAlert(
+    'Delete Project',
+    'Are you sure you want to delete this project?',
+    { confirmButtonText: 'Yes, delete it', cancelButtonText: 'Cancel', confirmButtonColor: '#EF4444' }
+  )
+  if (!result.isConfirmed) {
     return
   }
 
@@ -302,7 +308,7 @@ async function handleDeleteProject(id: string) {
   } catch (error: any) {
     // Show error only if it's not a "not found" error
     if (!error.message?.includes('not found') && !error.message?.includes('already deleted')) {
-      alert(error.message || 'Failed to delete project')
+      await showErrorAlert('Error', error.message || 'Failed to delete project')
     }
   } finally {
     loading.value = false

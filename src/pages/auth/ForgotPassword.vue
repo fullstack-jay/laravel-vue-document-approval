@@ -42,6 +42,7 @@ import { ref } from 'vue'
 import { KeyIcon } from '@heroicons/vue/24/outline'
 import AppInput from '@/components/common/AppInput.vue'
 import AppButton from '@/components/common/AppButton.vue'
+import { showSuccessAlert } from '@/composables/useSweetAlert'
 
 const form = ref({
   email: '',
@@ -54,7 +55,7 @@ async function handleSubmit() {
   // Simulate API call
   await new Promise(resolve => setTimeout(resolve, 1500))
   loading.value = false
-  // Show success message (in real app, use toast notification)
-  alert('If an account exists with this email, a reset link has been sent.')
+  // Show success message
+  await showSuccessAlert('Check Your Email', 'If an account exists with this email, a reset link has been sent.')
 }
 </script>

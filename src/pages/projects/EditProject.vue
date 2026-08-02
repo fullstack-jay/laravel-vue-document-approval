@@ -125,7 +125,7 @@
                 ref="fileInput"
                 type="file"
                 multiple
-                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                accept=".pdf,.xlsx,.xls"
                 class="hidden"
                 @change="handleFileSelect"
               />
@@ -134,7 +134,7 @@
                 Click to upload or drag and drop files here
               </p>
               <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX (Max 10MB each)
+                PDF, Excel (Max 10MB each)
               </p>
             </div>
 
@@ -221,6 +221,7 @@ import AppButton from '@/components/common/AppButton.vue'
 import LoadingSkeleton from '@/components/common/LoadingSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import { DocumentIcon, EyeIcon, TrashIcon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { showSuccessAlert, showErrorAlert, showConfirmAlert, showToast } from '@/composables/useSweetAlert'
 
 const router = useRouter()
 const route = useRoute()
@@ -314,10 +315,11 @@ async function handleSubmit() {
       }
     }
 
-    alert('Project updated successfully!')
+    await showSuccessAlert('Success', 'Project updated successfully!')
 
     router.push(`/projects/${id}`)
   } catch (error: any) {
+    await showErrorAlert('Error', error.message || 'Failed to update project')
     errorMessage.value = error.message || 'Failed to update project'
   } finally {
     isSubmitting.value = false
@@ -343,23 +345,19 @@ function addFiles(files: File[]) {
   for (const file of files) {
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      alert(`File "${file.name}" is too large. Maximum size is 10MB.`)
+      showToast(`File "${file.name}" is too large. Maximum size is 10MB.`, 'error')
       continue
     }
-    // Validate file type - backend accepts: pdf, doc, docx, xls, xlsx, ppt, pptx
+    // Validate file type - PDF and Excel only
     const validTypes = [
       'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-powerpoint',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     ]
-    const validExtensions = /\.(pdf|doc|docx|xls|xlsx|ppt|pptx)$/i
+    const validExtensions = /\.(pdf|xlsx|xls)$/i
 
     if (!validTypes.includes(file.type) && !file.name.match(validExtensions)) {
-      alert(`File "${file.name}" has invalid type. Please upload PDF, DOC, DOCX, XLS, XLSX, PPT, or PPTX.`)
+      showToast(`File "${file.name}" has invalid type. Please upload PDF or Excel files.`, 'error')
       continue
     }
     newDocuments.value.push(file)
@@ -372,7 +370,12 @@ function removeNewDocument(index: number) {
 
 async function handleDeleteDocument(documentId: string) {
   if (!project.value) return
-  if (!confirm('Are you sure you want to delete this document?')) {
+  const result = await showConfirmAlert(
+    'Delete Document',
+    'Are you sure you want to delete this document?',
+    { confirmButtonText: 'Yes, delete it', cancelButtonText: 'Cancel' }
+  )
+  if (!result.isConfirmed) {
     return
   }
 
@@ -380,9 +383,9 @@ async function handleDeleteDocument(documentId: string) {
     await projectStore.deleteDocument(project.value.id, documentId)
     // Remove from existing documents list
     existingDocuments.value = existingDocuments.value.filter(doc => doc.id !== documentId)
-    alert('Document deleted successfully!')
+    await showSuccessAlert('Success', 'Document deleted successfully!')
   } catch (error: any) {
-    alert(error.message || 'Failed to delete document')
+    await showErrorAlert('Error', error.message || 'Failed to delete document')
   }
 }
 
@@ -392,7 +395,7 @@ function handlePreview(doc: any) {
   if (url) {
     window.open(url, '_blank')
   } else {
-    alert('Preview not available for this document')
+    showToast('Preview not available for this document', 'warning')
   }
 }
 

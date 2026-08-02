@@ -69,12 +69,12 @@
               Drag and drop files here, or click to select
             </p>
             <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-              PDF, DOC, DOCX (Max 10MB)
+              PDF, Excel (Max 10MB)
             </p>
             <input
               type="file"
               multiple
-              accept=".pdf,.doc,.docx"
+              accept=".pdf,.xlsx,.xls"
               @change="handleFileUpload"
               class="hidden"
               id="file-upload"
@@ -181,6 +181,7 @@ import AppInput from '@/components/common/AppInput.vue'
 import AppButton from '@/components/common/AppButton.vue'
 import { DocumentIcon, XMarkIcon, PlusIcon } from '@heroicons/vue/24/outline'
 import type { ProjectFormData } from '@/modules/projects/types/project'
+import { showSuccessAlert, showErrorAlert, showToast } from '@/composables/useSweetAlert'
 
 const router = useRouter()
 const projectStore = useProjectStore()
@@ -256,12 +257,13 @@ async function handleSubmit() {
       }
     }
 
-    // Show success message (you can add toast here)
-    alert('Project created successfully!')
+    // Show success message
+    await showSuccessAlert('Success', 'Project created successfully!')
 
     // Redirect to project detail
     router.push(`/projects/${project.id}`)
   } catch (error: any) {
+    await showErrorAlert('Error', error.message || 'Failed to create project')
     errorMessage.value = error.message || 'Failed to create project'
   } finally {
     isSubmitting.value = false
@@ -303,10 +305,11 @@ async function handleSaveDraft() {
       }
     }
 
-    alert('Draft saved successfully!')
+    await showSuccessAlert('Success', 'Draft saved successfully!')
 
     router.push(`/projects/${project.id}`)
   } catch (error: any) {
+    await showErrorAlert('Error', error.message || 'Failed to save draft')
     errorMessage.value = error.message || 'Failed to save draft'
   } finally {
     isSavingDraft.value = false
@@ -328,14 +331,18 @@ function handleFileUpload(event: Event) {
 
       // Validate file size (10MB max)
       if (file.size > 10 * 1024 * 1024) {
-        alert(`File ${file.name} is too large. Max size is 10MB.`)
+        showToast(`File ${file.name} is too large. Max size is 10MB.`, 'error')
         continue
       }
 
-      // Validate file type
-      const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+      // Validate file type (PDF and Excel only)
+      const validTypes = [
+        'application/pdf',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      ]
       if (!validTypes.includes(file.type)) {
-        alert(`File ${file.name} is not supported. Please upload PDF, DOC, or DOCX files.`)
+        showToast(`File ${file.name} is not supported. Please upload PDF or Excel files.`, 'error')
         continue
       }
 

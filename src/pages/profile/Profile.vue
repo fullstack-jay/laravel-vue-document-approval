@@ -271,6 +271,7 @@ import AppButton from '@/components/common/AppButton.vue'
 import LoadingSkeleton from '@/components/common/LoadingSkeleton.vue'
 import { UserIcon, CameraIcon } from '@heroicons/vue/24/outline'
 import type { ProfileFormData, PasswordChangeData } from '@/modules/profile/types/profile'
+import { showSuccessAlert, showErrorAlert, showToast } from '@/composables/useSweetAlert'
 
 const profileStore = useProfileStore()
 const authStore = useAuthStore()
@@ -347,8 +348,9 @@ async function handleUpdateProfile() {
   try {
     await profileStore.updateProfile(form)
     profile.value = profileStore.profile
-    alert('Profile updated successfully!')
+    await showSuccessAlert('Success', 'Profile updated successfully!')
   } catch (error: any) {
+    await showErrorAlert('Error', error.message || 'Failed to update profile')
     errorMessage.value = error.message || 'Failed to update profile'
   } finally {
     isUpdating.value = false
@@ -410,13 +412,13 @@ async function handleAvatarUpload(event: Event) {
 
   // Validate file size (2MB max)
   if (file.size > 2 * 1024 * 1024) {
-    alert('File is too large. Max size is 2MB.')
+    showToast('File is too large. Max size is 2MB.', 'error')
     return
   }
 
   // Validate file type
   if (!file.type.startsWith('image/')) {
-    alert('File must be an image.')
+    showToast('File must be an image.', 'error')
     return
   }
 
@@ -425,9 +427,9 @@ async function handleAvatarUpload(event: Event) {
     if (profile.value) {
       profile.value.avatar = avatarUrl
     }
-    alert('Avatar uploaded successfully!')
+    await showSuccessAlert('Success', 'Avatar uploaded successfully!')
   } catch (error: any) {
-    alert(error.message || 'Failed to upload avatar')
+    await showErrorAlert('Error', error.message || 'Failed to upload avatar')
   }
 }
 

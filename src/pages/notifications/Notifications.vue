@@ -171,6 +171,7 @@ import {
   ArrowRightIcon,
   EnvelopeIcon,
 } from '@heroicons/vue/24/outline'
+import { showConfirmAlert } from '@/composables/useSweetAlert'
 
 const router = useRouter()
 const notificationStore = useNotificationStore()
@@ -193,7 +194,12 @@ async function handleMarkAllRead() {
 }
 
 async function handleDelete(notificationId: number) {
-  if (confirm('Are you sure you want to delete this notification?')) {
+  const result = await showConfirmAlert(
+    'Delete Notification',
+    'Are you sure you want to delete this notification?',
+    { confirmButtonText: 'Yes, delete it', cancelButtonText: 'Cancel' }
+  )
+  if (result.isConfirmed) {
     await notificationStore.deleteNotification(notificationId)
   }
 }

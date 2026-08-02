@@ -439,6 +439,7 @@ import {
   InformationCircleIcon,
   ChatBubbleLeftRightIcon,
 } from '@heroicons/vue/24/outline'
+import { showSuccessAlert, showErrorAlert, showConfirmAlert, showToast } from '@/composables/useSweetAlert'
 
 const router = useRouter()
 const route = useRoute()
@@ -500,7 +501,14 @@ async function handleReviewAction() {
     return
   }
 
-  if (!confirm(`Are you sure you want to ${reviewForm.decision} this application?`)) {
+  const decisionText = reviewForm.decision === 'approval' ? 'approve' :
+                      reviewForm.decision === 'revision' ? 'request revision for' : 'reject'
+  const result = await showConfirmAlert(
+    'Submit Review',
+    `Are you sure you want to ${decisionText} this application?`,
+    { confirmButtonText: 'Yes, submit', cancelButtonText: 'Cancel' }
+  )
+  if (!result.isConfirmed) {
     return
   }
 
@@ -523,17 +531,16 @@ async function handleReviewAction() {
     // Refresh project data
     await fetchProject()
 
-    console.log('After refresh - Review notes:', project.value?.reviewNotes || project.value?.review_notes)
-
     // Show success message
     const actionText = reviewForm.decision === 'approval' ? 'approved' :
                       reviewForm.decision === 'revision' ? 'sent for revision' : 'rejected'
-    alert(`Application ${actionText} successfully!`)
+    await showSuccessAlert('Success', `Application ${actionText} successfully!`)
 
     // Reset form
     reviewForm.note = ''
     reviewForm.decision = '' as 'approval' | 'revision' | 'rejection'
   } catch (error: any) {
+    await showErrorAlert('Error', error.message || 'Failed to submit review')
     errorMessage.value = error.message || 'Failed to submit review'
   } finally {
     isSubmitting.value = false
@@ -555,9 +562,9 @@ function handlePreview(doc: ProjectDocument) {
     // Open document in new tab for preview
     window.open(url, '_blank')
   } else {
-    // Fallback: show alert if no URL available
+    // Fallback: show toast if no URL available
     const fileName = doc.fileName || doc.file_name || 'Document'
-    alert(`No preview URL available for ${fileName}`)
+    showToast(`No preview URL available for ${fileName}`, 'warning')
   }
 }
 

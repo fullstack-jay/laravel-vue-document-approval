@@ -295,6 +295,7 @@ import {
   ArrowDownTrayIcon,
   ChatBubbleLeftRightIcon,
 } from '@heroicons/vue/24/outline'
+import { showSuccessAlert, showErrorAlert, showConfirmAlert, showToast } from '@/composables/useSweetAlert'
 
 const router = useRouter()
 const route = useRoute()
@@ -360,7 +361,12 @@ function handleEdit() {
 
 async function handleSubmit() {
   if (!project.value) return
-  if (!confirm('Are you sure you want to submit this project for review?')) {
+  const result = await showConfirmAlert(
+    'Submit Project',
+    'Are you sure you want to submit this project for review?',
+    { confirmButtonText: 'Yes, submit it', cancelButtonText: 'Cancel' }
+  )
+  if (!result.isConfirmed) {
     return
   }
 
@@ -373,9 +379,9 @@ async function handleSubmit() {
     const notificationStore = useNotificationStore()
     await notificationStore.fetchStats()
 
-    alert('Project submitted successfully!')
+    await showSuccessAlert('Success', 'Project submitted successfully!')
   } catch (error: any) {
-    alert(error.message || 'Failed to submit project')
+    await showErrorAlert('Error', error.message || 'Failed to submit project')
   } finally {
     isSubmitting.value = false
   }
@@ -383,15 +389,21 @@ async function handleSubmit() {
 
 async function handleDelete() {
   if (!project.value) return
-  if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+  const result = await showConfirmAlert(
+    'Delete Project',
+    'Are you sure you want to delete this project? This action cannot be undone.',
+    { confirmButtonText: 'Yes, delete it', cancelButtonText: 'Cancel', confirmButtonColor: '#EF4444' }
+  )
+  if (!result.isConfirmed) {
     return
   }
 
   try {
     await projectStore.deleteProject(project.value.id)
+    await showSuccessAlert('Success', 'Project deleted successfully!')
     router.push('/projects')
   } catch (error: any) {
-    alert(error.message || 'Failed to delete project')
+    await showErrorAlert('Error', error.message || 'Failed to delete project')
   }
 }
 
@@ -403,8 +415,9 @@ function handleDownload(doc: ProjectDocument) {
   if (downloadUrl) {
     // Open download URL in new tab
     window.open(downloadUrl, '_blank')
+    showToast(`Downloading ${fileName}...`, 'success')
   } else {
-    alert(`Downloading ${fileName}...`)
+    showToast('Download not available for this document', 'warning')
   }
 }
 
