@@ -28,7 +28,7 @@
               <StatusBadge :status="project.status" />
             </div>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              Submitted on {{ formatDate(project.submittedAt || project.createdAt) }}
+              Submitted on {{ formatDate(project.submittedAt || project.submitted_at || project.createdAt || project.created_at) }}
             </p>
           </div>
         </div>
@@ -91,19 +91,19 @@
               <DocumentIcon class="h-5 w-5 text-gray-400" />
               <div>
                 <p class="text-sm font-medium text-gray-700 dark:text-gray-200">
-                  {{ doc.fileName }}
+                  {{ doc.fileName || doc.file_name || 'Document' }}
                 </p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ formatFileSize(doc.fileSize) }}
+                  {{ formatFileSize(doc.fileSize || doc.file_size) || (doc.human_file_size || 'Unknown size') }}
                 </p>
               </div>
             </div>
             <button
-              @click="handleDownload(doc)"
+              @click="handlePreview(doc)"
               class="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
-              title="Download document"
+              title="Preview document"
             >
-              <ArrowDownTrayIcon class="h-5 w-5" />
+              <EyeIcon class="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -340,29 +340,29 @@
         <div class="space-y-5">
           <TimelineItem
             label="Created"
-            :date="project.createdAt"
+            :date="project.createdAt || project.created_at"
             :is-first="true"
           />
           <TimelineItem
-            v-if="project.submittedAt"
+            v-if="project.submittedAt || project.submitted_at"
             label="Submitted"
-            :date="project.submittedAt"
+            :date="project.submittedAt || project.submitted_at"
           />
           <TimelineItem
-            v-if="project.reviewedAt"
+            v-if="project.reviewedAt || project.reviewed_at"
             label="Reviewed"
-            :date="project.reviewedAt"
+            :date="project.reviewedAt || project.reviewed_at"
           />
           <TimelineItem
-            v-if="project.approvedAt"
+            v-if="project.approvedAt || project.approved_at"
             label="Approved"
-            :date="project.approvedAt"
+            :date="project.approvedAt || project.approved_at"
             :is-success="true"
           />
           <TimelineItem
-            v-if="project.rejectedAt"
+            v-if="project.rejectedAt || project.rejected_at"
             label="Rejected"
-            :date="project.rejectedAt"
+            :date="project.rejectedAt || project.rejected_at"
             :is-error="true"
           />
         </div>
@@ -395,7 +395,7 @@ import TimelineItem from '@/components/projects/TimelineItem.vue'
 import {
   ArrowLeftIcon,
   DocumentIcon,
-  ArrowDownTrayIcon,
+  EyeIcon,
   CheckCircleIcon,
   ArrowPathIcon,
   XCircleIcon,
@@ -506,16 +506,41 @@ function handleCancel() {
   errorMessage.value = ''
 }
 
-function handleDownload(doc: ProjectDocument) {
-  // Mock download
-  alert(`Downloading ${doc.fileName}...`)
+function handlePreview(doc: ProjectDocument) {
+  // Get the download URL from backend or construct it
+  const url = doc.downloadUrl || doc.download_url || doc.url || doc.file_path || ''
+
+  if (url) {
+    // Open document in new tab for preview
+    window.open(url, '_blank')
+  } else {
+    // Fallback: show alert if no URL available
+    const fileName = doc.fileName || doc.file_name || 'Document'
+    alert(`No preview URL available for ${fileName}`)
+  }
 }
 
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleString()
+function formatDate(dateString: string | undefined): string {
+  if (!dateString) return 'Invalid Date'
+
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return 'Invalid Date'
+
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  } catch {
+    return 'Invalid Date'
+  }
 }
 
-function formatFileSize(bytes: number): string {
+function formatFileSize(bytes: number | undefined): string {
+  if (bytes === undefined || bytes === null || isNaN(bytes)) return 'Unknown size'
   if (bytes === 0) return '0 Bytes'
   const k = 1024
   const sizes = ['Bytes', 'KB', 'MB', 'GB']
