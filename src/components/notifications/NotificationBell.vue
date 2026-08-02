@@ -139,8 +139,14 @@ async function handleMarkAllRead() {
 }
 
 async function handleNotificationClick(notification: any) {
-  // First delete the notification, then navigate
+  // Close dropdown FIRST before any async operations
+  closeDropdown()
+
+  // Delete the notification
   await notificationStore.deleteNotification(notification.id)
+
+  // Refresh the notification list to show updated list
+  await notificationStore.fetchNotifications()
 
   // Navigate to project detail if data contains projectId (support both snake_case and camelCase)
   const projectId = notification.data?.projectId || notification.data?.project_id
@@ -151,8 +157,6 @@ async function handleNotificationClick(notification: any) {
     // If no projectId, go to notifications list
     goToNotifications()
   }
-
-  closeDropdown()
 }
 
 // Helper function to check if notification is unread (supports both snake_case and camelCase)
