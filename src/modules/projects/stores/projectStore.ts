@@ -245,6 +245,19 @@ export const useProjectStore = defineStore('projects', () => {
     } catch (err: any) {
       error.value = err.message || 'Failed to delete project'
       console.error('Delete project error:', err)
+
+      // If project not found (404), it means it's already deleted
+      // Remove from local state to sync with backend reality
+      if (err.message?.includes('not found') || err.message?.includes('already deleted')) {
+        projects.value = projects.value.filter(p => p.id !== id)
+        pagination.value.total = Math.max(0, pagination.value.total - 1)
+
+        // Show warning instead of error
+        console.warn('Project already removed from server, updating local state')
+        // Don't throw error for this case
+        return
+      }
+
       throw err
     } finally {
       loading.value = false
