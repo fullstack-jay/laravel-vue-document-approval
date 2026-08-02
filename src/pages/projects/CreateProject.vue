@@ -246,19 +246,29 @@ async function handleSubmit() {
     const project = await projectStore.createProject(projectData)
 
     // Step 2: Upload documents one by one to the created project
+    // Use projectStore.uploadDocument to ensure currentProject is updated
     if (uploadedFiles.value.length > 0) {
       for (let i = 0; i < uploadedFiles.value.length; i++) {
         const file = uploadedFiles.value[i]
         try {
-          await projectService.uploadDocument(project.id, file)
+          await projectStore.uploadDocument(project.id, file)
         } catch (uploadError: any) {
           // Continue with next file even if one fails
+          console.error('Failed to upload document:', uploadError)
         }
       }
     }
 
     // Show success message
     await showSuccessAlert('Success', 'Project created successfully!')
+
+    // Mark this project as recently created in localStorage
+    // This helps ProjectDetail know to use store data instead of fetching from API
+    localStorage.setItem('recently_created_project_id', String(project.id))
+    localStorage.setItem('recently_created_project_timestamp', String(Date.now()))
+
+    // Also store the full project data as a fallback
+    localStorage.setItem('temp_project_data', JSON.stringify(project))
 
     // The project is already stored in projectStore.currentProject
     // So we can safely redirect to the detail page
@@ -295,18 +305,25 @@ async function handleSaveDraft() {
     const project = await projectStore.createProject(projectData)
 
     // Step 2: Upload documents one by one to the created project
+    // Use projectStore.uploadDocument to ensure currentProject is updated
     if (uploadedFiles.value.length > 0) {
       for (let i = 0; i < uploadedFiles.value.length; i++) {
         const file = uploadedFiles.value[i]
         try {
-          await projectService.uploadDocument(project.id, file)
+          await projectStore.uploadDocument(project.id, file)
         } catch (uploadError: any) {
           // Continue with next file even if one fails
+          console.error('Failed to upload document:', uploadError)
         }
       }
     }
 
     await showSuccessAlert('Success', 'Draft saved successfully!')
+
+    // Mark this project as recently created in localStorage
+    // This helps ProjectDetail know to use store data instead of fetching from API
+    localStorage.setItem('recently_created_project_id', String(project.id))
+    localStorage.setItem('recently_created_project_timestamp', String(Date.now()))
 
     // The project is already stored in projectStore.currentProject
     // So we can safely redirect to the detail page

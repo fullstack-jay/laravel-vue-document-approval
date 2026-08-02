@@ -361,21 +361,44 @@ async function fetchProject() {
 
   try {
     const id = route.params.id as string
-    console.log('Fetching project with ID:', id)
 
     // Check if currentProject in store matches the requested ID
-    // This avoids unnecessary API call after creating a new project
-    if (projectStore.currentProject && projectStore.currentProject.id === id) {
-      console.log('Using currentProject from store:', projectStore.currentProject)
+    if (projectStore.currentProject && String(projectStore.currentProject.id) === String(id)) {
       project.value = projectStore.currentProject
     } else {
+      // Check temp data from localStorage (fallback for recently created projects)
+      const tempProjectData = localStorage.getItem('temp_project_data')
+      if (tempProjectData) {
+        const tempProject = JSON.parse(tempProjectData)
+        if (String(tempProject.id) === String(id)) {
+          console.log('Using temp project data from localStorage')
+          project.value = tempProject
+          return
+        }
+      }
+
       // Otherwise fetch from API
       project.value = await projectStore.fetchProjectById(id)
-      console.log('Fetched project from API:', project.value)
     }
+
+    // Clear temp project data from localStorage if exists
+    localStorage.removeItem('temp_project_data')
   } catch (error: any) {
     console.error('Failed to fetch project:', error)
-    // Error is handled by the store
+
+    // If backend fails (500 error), try to use temp data as fallback
+    const tempProjectData = localStorage.getItem('temp_project_data')
+    if (tempProjectData) {
+      const tempProject = JSON.parse(tempProjectData)
+      if (String(tempProject.id) === String(id)) {
+        console.log('Backend failed, using temp project data as fallback')
+        project.value = tempProject
+        await showErrorAlert('Warning', 'Loaded project data from cache. Backend may have issues.')
+        return
+      }
+    }
+
+    project.value = null
   } finally {
     loading.value = false
   }
