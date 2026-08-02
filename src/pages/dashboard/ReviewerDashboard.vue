@@ -33,13 +33,11 @@
           icon-color="text-blue-600 dark:text-blue-400"
         />
         <StatisticCard
-          title="Approved Today"
-          :value="12"
+          title="Approved"
+          :value="stats.approved"
           icon="check"
           icon-bg-color="bg-green-100 dark:bg-green-900/30"
           icon-color="text-green-600 dark:text-green-400"
-          change="+15%"
-          change-type="positive"
         />
         <StatisticCard
           title="Revision Requests"
@@ -49,13 +47,11 @@
           icon-color="text-orange-600 dark:text-orange-400"
         />
         <StatisticCard
-          title="Rejected Today"
-          :value="3"
+          title="Rejected"
+          :value="stats.rejected"
           icon="close"
           icon-bg-color="bg-red-100 dark:bg-red-900/30"
           icon-color="text-red-600 dark:text-red-400"
-          change="+5%"
-          change-type="negative"
         />
       </div>
 
@@ -99,7 +95,7 @@
                       :style="{ width: `${item.percentage}%` }"
                     />
                     <span class="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {{ item.percentage }}%
+                      {{ item.count }}/{{ item.total }} ({{ item.percentage }}%)
                     </span>
                   </div>
                 </div>
@@ -183,7 +179,7 @@ const stats = computed(() => dashboardStore.stats)
 const recentActivities = computed(() => dashboardStore.recentActivities)
 const loading = computed(() => dashboardStore.loading)
 
-const reviewStats = [
+const reviewStats = computed(() => [
   {
     label: 'Total Reviewed',
     value: stats.value.approved + stats.value.rejected + stats.value.revisions,
@@ -220,14 +216,58 @@ const reviewStats = [
     textClass: 'text-orange-900 dark:text-orange-100',
     valueClass: 'text-orange-600 dark:text-orange-400',
   },
-]
+])
 
-const approvalRate = [
-  { label: 'Approved', percentage: 63, barColor: 'bg-green-500' },
-  { label: 'Rejected', percentage: 15, barColor: 'bg-red-500' },
-  { label: 'Revision', percentage: 8, barColor: 'bg-orange-500' },
-  { label: 'Pending', percentage: 14, barColor: 'bg-blue-500' },
-]
+const approvalRate = computed(() => {
+  // Calculate total reviewed (approved + rejected + revision)
+  const totalReviewed = stats.value.approved + stats.value.rejected + stats.value.revisions
+  const total = totalReviewed + stats.value.submitted // Include pending in total for percentage
+
+  if (total === 0) {
+    return [
+      { label: 'Approved', count: 0, total: total, percentage: 0, barColor: 'bg-green-500' },
+      { label: 'Rejected', count: 0, total: total, percentage: 0, barColor: 'bg-red-500' },
+      { label: 'Revision', count: 0, total: total, percentage: 0, barColor: 'bg-orange-500' },
+      { label: 'Pending', count: 0, total: total, percentage: 0, barColor: 'bg-blue-500' },
+    ]
+  }
+
+  const approvedPercent = total > 0 ? Math.round((stats.value.approved / total) * 100) : 0
+  const rejectedPercent = total > 0 ? Math.round((stats.value.rejected / total) * 100) : 0
+  const revisionPercent = total > 0 ? Math.round((stats.value.revisions / total) * 100) : 0
+  const pendingPercent = total > 0 ? Math.round((stats.value.submitted / total) * 100) : 0
+
+  return [
+    {
+      label: 'Approved',
+      count: stats.value.approved,
+      total: total,
+      percentage: approvedPercent,
+      barColor: 'bg-green-500'
+    },
+    {
+      label: 'Rejected',
+      count: stats.value.rejected,
+      total: total,
+      percentage: rejectedPercent,
+      barColor: 'bg-red-500'
+    },
+    {
+      label: 'Revision',
+      count: stats.value.revisions,
+      total: total,
+      percentage: revisionPercent,
+      barColor: 'bg-orange-500'
+    },
+    {
+      label: 'Pending',
+      count: stats.value.submitted,
+      total: total,
+      percentage: pendingPercent,
+      barColor: 'bg-blue-500'
+    },
+  ]
+})
 
 onMounted(async () => {
   setLoading(true)
