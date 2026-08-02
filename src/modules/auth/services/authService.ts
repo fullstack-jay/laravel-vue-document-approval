@@ -71,11 +71,19 @@ export const authService = {
   async register(data: RegisterData): Promise<AuthResponse> {
     try {
       const response = await api.post('/api/v1/auth/register', data)
-      const { responseData } = response
+
+      // Handle different response formats
+      const responseData = response.data.data || response.data
+      const user = responseData.user || responseData
+      const token = responseData.token || responseData.access_token || response.data.token
+
+      if (!user || !token) {
+        throw new Error('Invalid response format from server')
+      }
 
       return {
-        user: responseData.user,
-        token: responseData.token || responseData.access_token,
+        user,
+        token,
       }
     } catch (error: any) {
       const message = error.response?.data?.message ||

@@ -94,6 +94,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/modules/auth/stores/authStore'
 import AppInput from '@/components/common/AppInput.vue'
 import AppButton from '@/components/common/AppButton.vue'
+import { showSuccessAlert, showErrorAlert } from '@/composables/useSweetAlert'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -127,15 +128,28 @@ async function handleRegister() {
 
   try {
     setLoading(true)
-    await authStore.register({
+    const response = await authStore.register({
       name: form.value.name,
       email: form.value.email,
       password: form.value.password,
       passwordConfirmation: form.value.passwordConfirmation,
       role: form.value.role,
     })
-    router.push('/dashboard')
+
+    // Show success message
+    await showSuccessAlert(
+      'Registration Successful!',
+      'Your account has been created. You can now log in with your credentials.'
+    )
+
+    // Redirect to login page instead of dashboard
+    router.push('/login')
   } catch (error) {
+    // Show error message
+    await showErrorAlert(
+      'Registration Failed',
+      authStore.error || 'An error occurred during registration. Please try again.'
+    )
     console.error('Registration failed:', error)
   } finally {
     setLoading(false)
