@@ -344,17 +344,22 @@ export const projectService = {
   ): Promise<Project> {
     try {
       let endpoint = `/api/v1/reviewer/projects/${id}`
+      let body: any = {}
 
-      // Determine the appropriate endpoint based on status
+      // Determine the appropriate endpoint based on status and request body
       if (status === 'approved') {
         endpoint = `/api/v1/reviewer/projects/${id}/approve`
+        body = note ? { note } : {}
       } else if (status === 'rejected') {
         endpoint = `/api/v1/reviewer/projects/${id}/reject`
+        // Backend expects 'reason' for reject endpoint
+        body = note ? { reason: note } : {}
       } else if (status === 'revision') {
         endpoint = `/api/v1/reviewer/projects/${id}/request-revision`
+        body = note ? { note, reason: note } : {}
       }
 
-      const response = await api.post(endpoint, note ? { note } : {})
+      const response = await api.post(endpoint, body)
 
       return response.data.data || response.data
     } catch (error: any) {

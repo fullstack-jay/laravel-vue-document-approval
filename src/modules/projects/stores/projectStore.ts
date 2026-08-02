@@ -15,6 +15,7 @@ import type {
 export const useProjectStore = defineStore('projects', () => {
   // State
   const projects = ref<ProjectListItem[]>([])
+  const allProjects = ref<ProjectListItem[]>([]) // Store all projects for stats calculation
   const currentProject = ref<Project | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
@@ -29,25 +30,25 @@ export const useProjectStore = defineStore('projects', () => {
   // Track locally deleted projects to handle backend sync issues
   const locallyDeletedIds = ref<Set<string>>(new Set())
 
-  // Getters
+  // Getters - Calculate stats from allProjects, not filtered projects
   const draftProjects = computed(() =>
-    projects.value.filter(p => p.status === 'draft')
+    allProjects.value.filter(p => p.status === 'draft')
   )
 
   const submittedProjects = computed(() =>
-    projects.value.filter(p => p.status === 'submitted')
+    allProjects.value.filter(p => p.status === 'submitted')
   )
 
   const revisionProjects = computed(() =>
-    projects.value.filter(p => p.status === 'revision')
+    allProjects.value.filter(p => p.status === 'revision')
   )
 
   const approvedProjects = computed(() =>
-    projects.value.filter(p => p.status === 'approved')
+    allProjects.value.filter(p => p.status === 'approved')
   )
 
   const rejectedProjects = computed(() =>
-    projects.value.filter(p => p.status === 'rejected')
+    allProjects.value.filter(p => p.status === 'rejected')
   )
 
   const totalProjects = computed(() => pagination.value.total)
@@ -75,6 +76,11 @@ export const useProjectStore = defineStore('projects', () => {
       // Filter out locally deleted projects to handle backend sync issues
       const filteredProjects = response.data.filter(p => !locallyDeletedIds.value.has(p.id))
 
+      // If fetching all (no filter), store in allProjects for stats
+      if (!params || !params.status) {
+        allProjects.value = filteredProjects
+      }
+
       projects.value = filteredProjects
       pagination.value = {
         ...response.meta,
@@ -97,6 +103,20 @@ export const useProjectStore = defineStore('projects', () => {
 
     try {
       const response = await projectService.getReviewerProjects(params)
+
+      // If fetching with a specific filter, also fetch all for stats in background
+      if (params && params.status) {
+        // Fetch all projects in background for accurate stats
+        try {
+          const allResponse = await projectService.getReviewerProjects()
+          allProjects.value = allResponse.data
+        } catch (statsErr) {
+          console.error('Failed to fetch all projects for stats:', statsErr)
+        }
+      } else {
+        // No filter, store response as all projects
+        allProjects.value = response.data
+      }
 
       projects.value = response.data
       pagination.value = response.meta
@@ -283,11 +303,21 @@ export const useProjectStore = defineStore('projects', () => {
     try {
       const updatedProject = await projectService.updateProjectStatus(id, status, note)
 
-      // Update in local state
+      // Update in local state (projects)
       const index = projects.value.findIndex(p => p.id === id)
       if (index !== -1) {
         projects.value[index] = {
           ...projects.value[index],
+          status: updatedProject.status,
+          updatedAt: updatedProject.updatedAt,
+        }
+      }
+
+      // Update in allProjects for stats
+      const allIndex = allProjects.value.findIndex(p => p.id === id)
+      if (allIndex !== -1) {
+        allProjects.value[allIndex] = {
+          ...allProjects.value[allIndex],
           status: updatedProject.status,
           updatedAt: updatedProject.updatedAt,
         }
@@ -336,6 +366,7 @@ export const useProjectStore = defineStore('projects', () => {
   return {
     // State
     projects,
+    allProjects,
     currentProject,
     loading,
     error,
