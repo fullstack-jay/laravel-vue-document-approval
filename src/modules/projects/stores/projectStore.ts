@@ -363,6 +363,59 @@ export const useProjectStore = defineStore('projects', () => {
     error.value = null
   }
 
+  /**
+   * Upload document to project
+   */
+  async function uploadDocument(projectId: string, file: File) {
+    loading.value = true
+    error.value = null
+
+    try {
+      const document = await projectService.uploadDocument(projectId, file)
+
+      // Update current project documents list
+      if (currentProject.value && currentProject.value.id === projectId) {
+        if (!currentProject.value.documents) {
+          currentProject.value.documents = []
+        }
+        currentProject.value.documents.push(document)
+      }
+
+      return document
+    } catch (err: any) {
+      error.value = err.message || 'Failed to upload document'
+      console.error('Upload document error:', err)
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
+   * Delete document from project
+   */
+  async function deleteDocument(projectId: string, documentId: string) {
+    loading.value = true
+    error.value = null
+
+    try {
+      await projectService.deleteDocument(projectId, documentId)
+
+      // Update current project documents list
+      if (currentProject.value && currentProject.value.documents) {
+        currentProject.value.documents = currentProject.value.documents.filter(
+          doc => doc.id !== documentId && doc.documentId !== documentId
+        )
+      }
+    } catch (err: any) {
+      error.value = err.message || 'Failed to delete document'
+      console.error('Delete document error:', err)
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     // State
     projects,
@@ -391,6 +444,8 @@ export const useProjectStore = defineStore('projects', () => {
     submitProject,
     deleteProject,
     updateProjectStatus,
+    uploadDocument,
+    deleteDocument,
     setFilter,
     resetFilter,
     clearCurrentProject,

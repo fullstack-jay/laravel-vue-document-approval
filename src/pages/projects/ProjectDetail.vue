@@ -36,7 +36,7 @@
           <div class="flex flex-wrap items-center gap-2">
             <button
               v-if="canEdit"
-              @click="router.push(`/projects/${project.id}/edit`)"
+              @click="handleEdit"
               class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors text-sm font-medium"
             >
               <PencilIcon class="h-4 w-4 mr-2" />
@@ -271,6 +271,7 @@ const authStore = useAuthStore()
 const project = ref<Project | null>(null)
 const loading = ref(true)
 const isSubmitting = ref(false)
+const hasEdited = ref(false) // Track if user has edited the project in revision status
 
 // Safe computed properties with defaults
 const safeProject = computed(() => project.value)
@@ -278,13 +279,21 @@ const documents = computed(() => project.value?.documents || [])
 const reviewNotes = computed(() => project.value?.reviewNotes || [])
 
 const canEdit = computed(() => {
-  return project.value && project.value.status === 'draft' && authStore.isApplicant
-})
-
-const canSubmit = computed(() => {
   return project.value &&
          (project.value.status === 'draft' || project.value.status === 'revision') &&
          authStore.isApplicant
+})
+
+const canSubmit = computed(() => {
+  // For draft status, can always submit
+  if (project.value?.status === 'draft' && authStore.isApplicant) {
+    return true
+  }
+  // For revision status, must edit first before submitting
+  if (project.value?.status === 'revision' && authStore.isApplicant && hasEdited.value) {
+    return true
+  }
+  return false
 })
 
 const canDelete = computed(() => {
@@ -297,11 +306,22 @@ async function fetchProject() {
   try {
     const id = route.params.id as string
     project.value = await projectStore.fetchProjectById(id)
+    // Only reset hasEdited if it's not already true (preserve state when returning from edit)
+    if (!hasEdited.value) {
+      hasEdited.value = false
+    }
   } catch (error) {
     // Error is handled by the store
   } finally {
     loading.value = false
   }
+}
+
+function handleEdit() {
+  if (!project.value) return
+  // Mark as edited when user clicks Edit button
+  hasEdited.value = true
+  router.push(`/projects/${project.value.id}/edit`)
 }
 
 async function handleSubmit() {
