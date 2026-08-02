@@ -1,195 +1,603 @@
-# Document Approval Management System - Frontend
+# Document Approval System - Frontend
 
-A modern, production-ready frontend application for a Document Approval Management System built with Vue 3, Vite, TypeScript, and Tailwind CSS.
+Vue.js 3 frontend application for Document Approval Management System of Kementrian Lingkungan Hidup.
 
-## Features
+## Table of Contents
 
-- **Authentication**: Login, Register, Forgot Password, Reset Password
-- **Role-Based Dashboards**: Separate dashboards for Applicants and Reviewers
-- **Mock API Integration**: Ready for backend integration
-- **Responsive Design**: Mobile-first approach with Tailwind CSS
-- **Dark Mode**: Built-in dark mode support
-- **Type Safety**: Full TypeScript support
-- **Clean Architecture**: Feature-based folder structure
-- **Modern UI**: Reusable components with Vue 3 Composition API
+- [Overview](#overview)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Development Guidelines](#development-guidelines)
+- [Code Standards](#code-standards)
+- [API Integration](#api-integration)
+- [State Management](#state-management)
+- [Components](#components)
+- [Routing](#routing)
+- [Styling](#styling)
+- [Backend Integration](#backend-integration)
+
+## Overview
+
+This is a modern Vue.js 3 application built with TypeScript, Vite, and Tailwind CSS. It provides a document approval workflow system for the Ministry of Environment.
+
+### Key Features
+
+- **User Authentication**: Login, registration, password reset
+- **Role-based Access**: Applicant, Reviewer, and Admin roles
+- **Project Management**: Create, edit, submit, and track document submissions
+- **Review Workflow**: Reviewers can approve, reject, or request revisions
+- **File Management**: Upload and manage supporting documents (PDF, Excel only)
+- **Notifications**: Real-time notification system with auto-delete on click
+- **Export**: Export projects to PDF and Excel formats
+- **Dark Mode**: Full dark mode support
+- **Responsive Design**: Mobile-first responsive UI
+- **SweetAlert2**: Beautiful alert dialogs and confirmations
 
 ## Tech Stack
 
-- **Framework**: Vue 3 (Composition API)
-- **Build Tool**: Vite 8
-- **Language**: TypeScript 5
-- **State Management**: Pinia
-- **Routing**: Vue Router 4
-- **Styling**: Tailwind CSS v3
-- **HTTP Client**: Axios
-- **Icons**: Heroicons Vue
+| Category | Technology | Version |
+|----------|-----------|---------|
+| **Framework** | Vue.js | 3.x |
+| **Language** | TypeScript | 5.x |
+| **Build Tool** | Vite | 5.x |
+| **State Management** | Pinia | 2.x |
+| **Routing** | Vue Router | 4.x |
+| **Styling** | Tailwind CSS | 3.x |
+| **Icons** | Heroicons | 24/outline |
+| **HTTP Client** | Axios | 1.x |
+| **Alerts** | SweetAlert2 | 11.x |
+| **Date Handling** | Native (custom WIB formatters) |
 
 ## Project Structure
 
 ```
 src/
-├── assets/
-│   └── styles/
-│       └── main.css
-├── components/
-│   ├── common/           # Reusable UI components
-│   ├── layout/           # Layout components (Navbar, Sidebar)
-│   └── dashboard/        # Dashboard-specific components
-├── composables/          # Vue composables
-├── layouts/              # Page layouts
-├── modules/              # Feature modules
-│   ├── auth/
-│   └── dashboard/
-├── pages/                # Route pages
-│   ├── auth/
-│   └── dashboard/
-├── router/               # Vue Router configuration
-├── services/             # API services
-│   ├── api/
-│   └── mock/
-├── stores/               # Pinia stores
-├── types/                # TypeScript type definitions
-├── utils/                # Utility functions
-├── App.vue
-└── main.ts
+├── assets/              # Static assets (images, fonts)
+├── components/          # Reusable Vue components
+│   ├── common/         # Common UI components
+│   │   ├── AppButton.vue
+│   │   ├── AppInput.vue
+│   │   ├── Card.vue
+│   │   ├── EmptyState.vue
+│   │   ├── LoadingSkeleton.vue
+│   │   ├── PageHeader.vue
+│   │   └── StatusBadge.vue
+│   ├── dashboard/      # Dashboard-specific components
+│   │   ├── ActivityCard.vue
+│   │   ├── ActivityList.vue
+│   │   └── StatisticCard.vue
+│   ├── layout/         # Layout components
+│   │   ├── LayoutWrapper.vue
+│   │   ├── Logo.vue
+│   │   ├── Navbar.vue
+│   │   ├── Sidebar.vue
+│   │   └── SidebarLink.vue
+│   ├── notifications/  # Notification components
+│   │   └── NotificationBell.vue
+│   └── projects/       # Project-related components
+│       ├── ProjectCard.vue
+│       └── TimelineItem.vue
+├── composables/        # Vue composables (reusable logic)
+│   ├── useDarkMode.ts
+│   ├── useFileExport.ts
+│   └── useSweetAlert.ts
+├── layouts/            # Page layout wrappers
+│   ├── AppLayout.vue
+│   └── AuthLayout.vue
+├── modules/            # Feature modules (domain-driven)
+│   ├── auth/          # Authentication module
+│   │   ├── services/
+│   │   │   └── authService.ts
+│   │   ├── stores/
+│   │   │   └── authStore.ts
+│   │   └── types/
+│   │       └── auth.ts
+│   ├── dashboard/     # Dashboard module
+│   │   ├── services/
+│   │   ├── stores/
+│   │   └── types/
+│   ├── notifications/ # Notifications module
+│   │   ├── services/
+│   │   ├── stores/
+│   │   └── types/
+│   ├── profile/       # Profile module
+│   │   ├── services/
+│   │   ├── stores/
+│   │   └── types/
+│   └── projects/      # Projects module
+│       ├── services/
+│       │   └── projectService.ts
+│       ├── stores/
+│       │   └── projectStore.ts
+│       └── types/
+│           └── project.ts
+├── pages/              # Page components
+│   ├── auth/          # Authentication pages
+│   │   ├── ForgotPassword.vue
+│   │   ├── Login.vue
+│   │   ├── Register.vue
+│   │   └── ResetPassword.vue
+│   ├── dashboard/     # Dashboard pages
+│   │   ├── ApplicantDashboard.vue
+│   │   └── ReviewerDashboard.vue
+│   ├── notifications/ # Notification pages
+│   │   └── Notifications.vue
+│   ├── profile/       # Profile pages
+│   │   └── Profile.vue
+│   ├── projects/      # Project pages
+│   │   ├── CreateProject.vue
+│   │   ├── EditProject.vue
+│   │   ├── ProjectDetail.vue
+│   │   ├── ProjectList.vue
+│   │   └── ReviewerProjectDetail.vue
+│   └── NotFound.vue
+├── router/            # Vue Router configuration
+│   └── index.ts
+├── services/          # Shared services
+│   ├── api/          # HTTP client setup
+│   │   └── http.ts
+│   └── mock/         # Mock data for development
+│       ├── authData.ts
+│       ├── dashboardData.ts
+│       └── projectData.ts
+├── types/             # Global TypeScript types
+│   ├── common.ts
+│   └── index.ts
+├── utils/             # Utility functions
+├── App.vue            # Root component
+└── main.ts            # Application entry point
 ```
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ 
-- npm or yarn
+- Node.js 22.x or higher
+- npm or yarn package manager
+- Laravel backend API running on port 8000
 
 ### Installation
 
-1. Install dependencies:
 ```bash
-npm install
-```
+# Clone the repository
+git clone <repository-url>
 
-2. Start development server:
-```bash
+# Navigate to project directory
+cd laravel-vue-document-approval
+
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
 ```
 
-3. Build for production:
-```bash
-npm run build
+### Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+VITE_API_BASE_URL=http://127.0.0.1:8000
 ```
 
-4. Preview production build:
-```bash
-npm run preview
+## Development Guidelines
+
+### File Naming Conventions
+
+- **Components**: PascalCase (e.g., `ProjectCard.vue`, `AppButton.vue`)
+- **Composables**: camelCase with `use` prefix (e.g., `useFileExport.ts`, `useSweetAlert.ts`)
+- **Services**: camelCase (e.g., `authService.ts`, `projectService.ts`)
+- **Stores**: camelCase with `Store` suffix (e.g., `authStore.ts`, `projectStore.ts`)
+- **Types**: camelCase (e.g., `auth.ts`, `project.ts`)
+- **Pages**: PascalCase (e.g., `ProjectDetail.vue`, `Login.vue`)
+
+### Component Structure
+
+Each component should follow this structure:
+
+```vue
+<template>
+  <!-- Component template -->
+</template>
+
+<script setup lang="ts">
+/**
+ * ComponentName Component
+ *
+ * Brief description of what this component does.
+ *
+ * @example
+ * <ComponentName prop="value" />
+ */
+
+// Imports
+import { ref, computed, onMounted } from 'vue'
+import type { SomeType } from '@/types'
+
+// Props interface
+interface Props {
+  propOne: string
+  propTwo?: number
+}
+
+// Props definition
+const props = withDefaults(defineProps<Props>(), {
+  propTwo: 0
+})
+
+// Emits definition
+interface Emits {
+  (e: 'event-name', value: string): void
+}
+
+const emit = defineEmits<Emits>()
+
+// State
+const state = ref('initial')
+
+// Computed
+const computedValue = computed(() => {
+  // Logic
+})
+
+// Methods
+const handleAction = () => {
+  // Logic
+}
+
+// Lifecycle
+onMounted(() => {
+  // Initialization
+})
+</script>
+
+<style scoped>
+/* Component-specific styles */
+</style>
 ```
 
-## Demo Credentials
+### Composable Pattern
 
-The application uses mock data for demonstration:
+Composables should be reusable and follow this pattern:
 
-**Applicant:**
-- Email: `applicant@example.com`
-- Password: `password123`
+```typescript
+/**
+ * useComposableName
+ *
+ * Description of what this composable does.
+ *
+ * @module composables/useComposableName
+ *
+ * @example
+ * ```typescript
+ * const { value, method } = useComposableName()
+ * ```
+ */
 
-**Reviewer:**
-- Email: `reviewer@example.com`
-- Password: `password123`
+import { ref, computed, type Ref } from 'vue'
 
-## Available Pages
+// Type definitions
+interface ComposableState {
+  // State properties
+}
 
-### Authentication
-- `/login` - Login page
-- `/register` - Registration page
-- `/forgot-password` - Password reset request
-- `/reset-password` - Reset password form
+// Main composable function
+export function useComposableName() {
+  // State
+  const state: Ref<ComposableState> = ref(defaultValue)
 
-### Dashboard
-- `/dashboard` - Applicant dashboard
-- `/reviewer-dashboard` - Reviewer dashboard
+  // Computed
+  const computedValue = computed(() => {
+    // Logic
+  })
+
+  // Methods
+  const method = () => {
+    // Logic
+  }
+
+  // Return public API
+  return {
+    state,
+    computedValue,
+    method,
+  }
+}
+```
+
+## Code Standards
+
+### PSR-12 Compliance for TypeScript
+
+This project follows PSR-12 coding standards adapted for TypeScript:
+
+1. **Indentation**: 2 spaces (no tabs)
+2. **Line Length**: Maximum 120 characters
+3. **Blank Lines**: 
+   - One blank line after imports
+   - One blank line between functions
+4. **Spacing**: 
+   - Spaces around operators (`a = b + c`)
+   - Spaces after commas in function calls
+5. **Braces**: Opening brace on same line
+6. **Naming**: 
+   - Classes/Types: PascalCase
+   - Functions/Variables: camelCase
+   - Constants: UPPER_SNAKE_CASE
+
+### TypeScript Guidelines
+
+1. **Always use types**: Avoid `any` whenever possible
+2. **Use type imports**: `import type { ... }` for type-only imports
+3. **Define interfaces** for complex objects
+4. **Use generics** when appropriate
+5. **Add JSDoc comments** for exported functions
+
+```typescript
+// Good
+import type { User, Project } from '@/types'
+
+interface FetchProjectsOptions {
+  page?: number
+  status?: ProjectStatus
+}
+
+async function fetchProjects(options?: FetchProjectsOptions): Promise<Project[]> {
+  // Implementation
+}
+
+// Avoid
+async function fetchProjects(options?: any): Promise<any> {
+  // Implementation
+}
+```
+
+### Vue 3 Best Practices
+
+1. **Use Composition API** with `<script setup>`
+2. **Prefer composables** over mixins
+3. **Use refs and reactives** appropriately
+4. **Computed properties** for derived state
+5. **Watch effects** sparingly
+
+### Naming Conventions
+
+- **Variables**: camelCase (e.g., `projectList`, `isLoading`)
+- **Constants**: UPPER_SNAKE_CASE (e.g., `API_BASE_URL`)
+- **Functions**: camelCase with verb prefix (e.g., `handleSubmit`, `fetchData`)
+- **Types/Interfaces**: PascalCase (e.g., `Project`, `User`)
+- **Booleans**: Prefix with `is/has/can` (e.g., `isLoading`, `hasAccess`)
+
+### Comment Guidelines
+
+```typescript
+/**
+ * Function description
+ *
+ * Detailed explanation if needed.
+ *
+ * @param paramOne - Description of first parameter
+ * @param paramTwo - Description of second parameter
+ * @returns Description of return value
+ *
+ * @example
+ * ```typescript
+ * const result = functionName(arg1, arg2)
+ * ```
+ */
+```
+
+## API Integration
+
+### HTTP Client
+
+The application uses Axios with interceptors for authentication:
+
+```typescript
+// services/api/http.ts
+- Request interceptor adds Bearer token
+- Response interceptor handles 401 errors
+- Base URL from environment variable
+```
+
+### Service Pattern
+
+Each module has its own service:
+
+```typescript
+// modules/auth/services/authService.ts
+export const authService = {
+  async login(credentials: LoginCredentials): Promise<AuthResponse>,
+  async register(data: RegisterData): Promise<AuthResponse>,
+  async logout(): Promise<void>,
+}
+```
+
+### Error Handling
+
+All API calls should be wrapped in try-catch:
+
+```typescript
+try {
+  const response = await service.someMethod()
+  // Handle success
+} catch (error: any) {
+  const message = error.response?.data?.message || error.message
+  // Handle error
+  await showErrorAlert('Error', message)
+}
+```
+
+## State Management
+
+### Pinia Stores
+
+Each feature module has its own store:
+
+```typescript
+// modules/projects/stores/projectStore.ts
+export const useProjectStore = defineStore('project', () => {
+  // State
+  const projects = ref<Project[]>([])
+  const loading = ref(false)
+
+  // Actions
+  async function fetchProjects() {
+    // Implementation
+  }
+
+  // Getters
+  const filteredProjects = computed(() => {
+    // Computed logic
+  })
+
+  return {
+    projects,
+    loading,
+    fetchProjects,
+    filteredProjects,
+  }
+})
+```
 
 ## Components
 
 ### Common Components
-- `AppButton` - Reusable button with variants and loading states
-- `AppInput` - Form input with validation
-- `Card` - Container component for content sections
-- `StatusBadge` - Badge for displaying application status
-- `EmptyState` - Placeholder for empty content
-- `LoadingSkeleton` - Skeleton loading state
-- `PageHeader` - Page title and actions header
 
-### Dashboard Components
-- `StatisticCard` - Display statistics with icons and trends
-- `ActivityCard` - Display activity items
-- `ActivityList` - List of activities
+Reusable UI components in `src/components/common/`:
 
-### Layout Components
-- `Navbar` - Top navigation bar with user menu
-- `Sidebar` - Side navigation menu
-- `SidebarLink` - Navigation link with active states
+- `AppButton.vue` - Standardized button with loading states
+- `AppInput.vue` - Form input with validation
+- `Card.vue` - Card container component
+- `PageHeader.vue` - Page header with actions
+- `StatusBadge.vue` - Status badge component
+- `LoadingSkeleton.vue` - Skeleton loader
+- `EmptyState.vue` - Empty state placeholder
 
-## Stores (Pinia)
+### Component Props
 
-### Auth Store
+Always define prop types:
+
 ```typescript
-import { useAuthStore } from '@/stores/auth'
+interface Props {
+  title: string
+  status: ProjectStatus
+  size?: 'sm' | 'md' | 'lg'
+}
 
-const authStore = useAuthStore()
-await authStore.login({ email, password })
-await authStore.logout()
+const props = withDefaults(defineProps<Props>(), {
+  size: 'md'
+})
 ```
 
-### Dashboard Store
-```typescript
-import { useDashboardStore } from '@/stores/dashboard'
+## Routing
 
-const dashboardStore = useDashboardStore()
-await dashboardStore.fetchDashboardStats('applicant')
+### Route Structure
+
+```typescript
+// Public routes
+/login              - Login page
+/register            - Registration page
+/forgot-password     - Forgot password
+
+// Protected routes (require auth)
+/dashboard           - Applicant dashboard
+/reviewer-dashboard  - Reviewer dashboard
+/projects            - Project list with pagination
+/projects/create     - Create new project
+/projects/:id        - Project detail
+/projects/:id/edit   - Edit project
+/profile             - User profile
+/notifications       - Notification list
+
+// Reviewer routes
+/projects/:id/review - Review project
 ```
 
-## Status Types
+### Route Guards
 
-The application uses the following status types:
+Authentication guard checks for valid token:
 
-- `draft` - Application is in draft state
-- `submitted` - Application has been submitted
-- `revision` - Application needs revision
-- `approved` - Application has been approved
-- `rejected` - Application has been rejected
-- `created` - Resource was created
+```typescript
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  const requiresAuth = to.meta.requiresAuth
 
-## Customization
+  if (requiresAuth && !authStore.isAuthenticated) {
+    next('/login')
+  } else {
+    next()
+  }
+})
+```
 
-### Colors
+## Styling
 
-Custom colors are defined in `tailwind.config.js`:
+### Tailwind CSS Configuration
+
+Primary colors and theme in `tailwind.config.js`:
 
 ```javascript
-colors: {
-  primary: { /* ... */ },
-  draft: '#6B7280',
-  submitted: '#3B82F6',
-  revision: '#F59E0B',
-  approved: '#10B981',
-  rejected: '#EF4444'
+theme: {
+  extend: {
+    colors: {
+      primary: {
+        50: '#EFF6FF',
+        500: '#3B82F6',
+        600: '#2563EB',
+        700: '#1D4ED8',
+      },
+      // Status colors
+      draft: '#6B7280',
+      submitted: '#3B82F6',
+      revision: '#F59E0B',
+      approved: '#10B981',
+      rejected: '#EF4444',
+    }
+  }
 }
 ```
 
-### Theme
+### Dark Mode
 
-The application supports dark mode. Toggle is available in the navbar.
+Dark mode is class-based and can be toggled via `useDarkMode` composable.
 
-## Roadmap
+## Backend Integration
 
-Future enhancements:
-- [ ] Project list with pagination/filtering
-- [ ] Create/Edit project forms
-- [ ] Document upload functionality
-- [ ] Review workflow pages
-- [ ] Notification system
-- [ ] Profile settings
-- [ ] Real-time updates
+This frontend is designed to work with a Laravel backend. See:
+
+- **`BACKEND_REGISTRATION_GUIDE.md`** - User registration API implementation
+- **`BACKEND_EXPORT_GUIDE.md`** - PDF/Excel export API implementation
+
+### Demo Credentials
+
+**Reviewer:**
+- Email: `reviewer@example.com`
+- Password: `password`
+
+**Registration:**
+- New users are automatically assigned `applicant` role
+
+## Available Scripts
+
+```bash
+# Development
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Type checking
+npm run type-check
+
+# Linting
+npm run lint
+```
 
 ## License
 
-MIT License
+Copyright © 2026 Kementrian Lingkungan Hidup. All rights reserved.
