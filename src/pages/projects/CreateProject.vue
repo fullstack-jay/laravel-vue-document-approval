@@ -115,6 +115,16 @@
                 <XMarkIcon class="h-5 w-5" />
               </button>
             </div>
+
+            <!-- Add more files button -->
+            <button
+              type="button"
+              @click="fileInputRef?.click()"
+              class="w-full flex items-center justify-center gap-2 p-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <PlusIcon class="h-5 w-5 text-gray-400" />
+              <span class="text-sm text-gray-600 dark:text-gray-400">Add more files</span>
+            </button>
           </div>
         </div>
 
@@ -169,7 +179,7 @@ import PageHeader from '@/components/common/PageHeader.vue'
 import Card from '@/components/common/Card.vue'
 import AppInput from '@/components/common/AppInput.vue'
 import AppButton from '@/components/common/AppButton.vue'
-import { DocumentIcon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { DocumentIcon, XMarkIcon, PlusIcon } from '@heroicons/vue/24/outline'
 import type { ProjectFormData } from '@/modules/projects/types/project'
 
 const router = useRouter()

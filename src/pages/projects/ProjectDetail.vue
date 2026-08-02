@@ -11,7 +11,7 @@
       <div class="space-y-4 mb-10">
         <!-- Back Button -->
         <button
-          @click="router.back()"
+          @click="router.push('/projects')"
           class="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
         >
           <ArrowLeftIcon class="h-4 w-4 mr-2" />
@@ -378,18 +378,26 @@ function formatDate(dateString: string): string {
   if (!dateString) return 'Invalid Date'
 
   try {
-    const date = new Date(dateString)
-    if (isNaN(date.getTime())) return 'Invalid Date'
+    // Parse the datetime string directly without timezone conversion
+    // Backend sends in WIB format: "2026-08-02 06:38:45"
+    const dateMatch = dateString.match(/(\d{4})-(\d{2})-(\d{2})[\sT](\d{2}):(\d{2}):(\d{2})/)
 
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+    if (dateMatch) {
+      const [, year, month, day, hour, minute] = dateMatch
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                         'July', 'August', 'September', 'October', 'November', 'December']
+
+      const monthName = monthNames[parseInt(month) - 1]
+      const hour24 = parseInt(hour)
+      const minuteFormatted = minute
+
+      return `${monthName} ${parseInt(day)}, ${year} at ${hour24.toString().padStart(2, '0')}:${minuteFormatted} WIB`
+    }
+
+    // Fallback for other formats
+    return dateString
   } catch {
-    return 'Invalid Date'
+    return dateString || 'Invalid Date'
   }
 }
 

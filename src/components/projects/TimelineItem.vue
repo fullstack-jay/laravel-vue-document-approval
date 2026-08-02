@@ -43,6 +43,23 @@ const bgClass = computed(() => {
 })
 
 function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleString()
+  if (!dateString) return 'Invalid Date'
+
+  try {
+    // Parse the datetime string directly without timezone conversion
+    // Backend sends in WIB format: "2026-08-02 06:38:45"
+    const dateMatch = dateString.match(/(\d{4})-(\d{2})-(\d{2})[\sT](\d{2}):(\d{2}):(\d{2})/)
+
+    if (dateMatch) {
+      const [, year, month, day, hour, minute, second] = dateMatch
+      // Format: 8/2/2026, 06:38:45 WIB
+      return `${parseInt(month)}/${parseInt(day)}/${year}, ${hour}:${minute}:${second} WIB`
+    }
+
+    // Fallback for other formats - try to parse without timezone conversion
+    return dateString
+  } catch {
+    return dateString || 'Invalid Date'
+  }
 }
 </script>
