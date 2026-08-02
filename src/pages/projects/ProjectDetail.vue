@@ -209,11 +209,43 @@
             label="Submitted"
             :date="project.submitted_at || project.submittedAt"
           />
-          <TimelineItem
-            v-if="project.reviewed_at || project.reviewedAt"
-            label="Reviewed"
-            :date="project.reviewed_at || project.reviewedAt"
-          />
+          <!-- Review Notes in Timeline -->
+          <div
+            v-for="note in allReviewNotes"
+            :key="note.id"
+            class="flex items-start space-x-4"
+          >
+            <!-- Icon -->
+            <div class="flex-shrink-0">
+              <div
+                class="w-10 h-10 rounded-full flex items-center justify-center"
+                :class="getNoteIconBgClass(note.type)"
+              >
+                <ChatBubbleLeftRightIcon class="h-5 w-5" :class="getNoteIconClass(note.type)" />
+              </div>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <p class="text-sm font-medium text-gray-900 dark:text-white">
+                  {{ note.reviewer?.name || note.reviewerName || note.reviewer_name || 'Reviewer' }}
+                </p>
+                <span
+                  class="px-2 py-0.5 text-xs font-medium rounded-full"
+                  :class="getNoteBadgeClasses(note.type)"
+                >
+                  {{ note.type_label || note.type }}
+                </span>
+              </div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {{ note.note }}
+              </p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {{ formatDate(note.created_at || note.createdAt) }}
+              </p>
+            </div>
+          </div>
           <TimelineItem
             v-if="project.approved_at || project.approvedAt"
             label="Approved"
@@ -261,6 +293,7 @@ import {
   PaperAirplaneIcon,
   DocumentIcon,
   ArrowDownTrayIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
@@ -271,7 +304,13 @@ const authStore = useAuthStore()
 const project = ref<Project | null>(null)
 const loading = ref(true)
 const isSubmitting = ref(false)
-const hasEdited = ref(false) // Track if user has edited the project in revision status
+
+// Computed property to combine review notes from both naming conventions
+const allReviewNotes = computed(() => {
+  const notes = project.value?.review_notes || project.value?.reviewNotes || []
+  // Ensure it's always an array
+  return Array.isArray(notes) ? notes : []
+})
 
 // Safe computed properties with defaults
 const safeProject = computed(() => project.value)
@@ -285,12 +324,11 @@ const canEdit = computed(() => {
 })
 
 const canSubmit = computed(() => {
-  // For draft status, can always submit
+  // For draft and revision status, can submit
   if (project.value?.status === 'draft' && authStore.isApplicant) {
     return true
   }
-  // For revision status, must edit first before submitting
-  if (project.value?.status === 'revision' && authStore.isApplicant && hasEdited.value) {
+  if (project.value?.status === 'revision' && authStore.isApplicant) {
     return true
   }
   return false
@@ -306,10 +344,6 @@ async function fetchProject() {
   try {
     const id = route.params.id as string
     project.value = await projectStore.fetchProjectById(id)
-    // Only reset hasEdited if it's not already true (preserve state when returning from edit)
-    if (!hasEdited.value) {
-      hasEdited.value = false
-    }
   } catch (error) {
     // Error is handled by the store
   } finally {
@@ -401,6 +435,36 @@ function formatDate(dateString: string): string {
   }
 }
 
+function getNoteBadgeClasses(type: string): string {
+  const classes: Record<string, string> = {
+    info: 'bg-blue-100/80 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 border-blue-200 dark:border-blue-700',
+    revision: 'bg-orange-100/80 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300 border-orange-200 dark:border-orange-700',
+    approval: 'bg-green-100/80 text-green-700 dark:bg-green-900/50 dark:text-green-300 border-green-200 dark:border-green-700',
+    rejection: 'bg-rose-100/80 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300 border-rose-200 dark:border-rose-700',
+  }
+  return classes[type] || classes.info
+}
+
+function getNoteIconBgClass(type: string): string {
+  const classes: Record<string, string> = {
+    info: 'bg-blue-100 dark:bg-blue-900/30',
+    revision: 'bg-orange-100 dark:bg-orange-900/30',
+    approval: 'bg-green-100 dark:bg-green-900/30',
+    rejection: 'bg-rose-100 dark:bg-rose-900/30',
+  }
+  return classes[type] || classes.info
+}
+
+function getNoteIconClass(type: string): string {
+  const classes: Record<string, string> = {
+    info: 'text-blue-600 dark:text-blue-400',
+    revision: 'text-orange-600 dark:text-orange-400',
+    approval: 'text-green-600 dark:text-green-400',
+    rejection: 'text-rose-600 dark:text-rose-400',
+  }
+  return classes[type] || classes.info
+}
+
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes'
   const k = 1024
@@ -437,16 +501,6 @@ function getNoteTextColor(type: string): string {
     rejection: 'text-gray-700 dark:text-gray-300',
   }
   return colors[type] || colors.info
-}
-
-function getNoteBadgeClasses(type: string): string {
-  const classes: Record<string, string> = {
-    info: 'bg-blue-100/80 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 border-blue-200 dark:border-blue-700',
-    revision: 'bg-orange-100/80 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300 border-orange-200 dark:border-orange-700',
-    approval: 'bg-green-100/80 text-green-700 dark:bg-green-900/50 dark:text-green-300 border-green-200 dark:border-green-700',
-    rejection: 'bg-rose-100/80 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300 border-rose-200 dark:border-rose-700',
-  }
-  return classes[type] || classes.info
 }
 
 onMounted(() => {

@@ -355,7 +355,7 @@
           />
           <!-- Review Notes in Timeline -->
           <div
-            v-for="note in project.reviewNotes"
+            v-for="note in (project.reviewNotes || project.review_notes || [])"
             :key="note.id"
             class="flex items-start space-x-4"
           >
@@ -365,7 +365,7 @@
                 class="w-10 h-10 rounded-full flex items-center justify-center"
                 :class="getNoteIconBgClass(note.type)"
               >
-                <CommentIcon class="h-5 w-5" :class="getNoteIconClass(note.type)" />
+                <ChatBubbleLeftRightIcon class="h-5 w-5" :class="getNoteIconClass(note.type)" />
               </div>
             </div>
 
@@ -437,7 +437,7 @@ import {
   ArrowPathIcon,
   XCircleIcon,
   InformationCircleIcon,
-  ChatBubbleLeftRightIcon as CommentIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
@@ -522,6 +522,8 @@ async function handleReviewAction() {
 
     // Refresh project data
     await fetchProject()
+
+    console.log('After refresh - Review notes:', project.value?.reviewNotes || project.value?.review_notes)
 
     // Show success message
     const actionText = reviewForm.decision === 'approval' ? 'approved' :
