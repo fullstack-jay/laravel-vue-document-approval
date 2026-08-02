@@ -224,9 +224,6 @@ async function handleDeleteProject(id: string) {
     loading.value = false
   }
 }
-    loading.value = false
-  }
-}
 
 onMounted(() => {
   handleFilterChange('all')
