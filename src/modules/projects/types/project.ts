@@ -12,13 +12,25 @@ export type ProjectCategory = 'permohonan' | 'pengajuan' | 'permintaan' | 'lainn
  * Document file type
  */
 export interface ProjectDocument {
-  id: string
-  projectId: string
+  id: string | number
+  projectId: string | number
   fileName: string
+  file_name: string // Backend uses snake_case
   fileType: 'pdf' | 'doc' | 'docx'
+  file_type: string // Backend uses snake_case
   fileSize: number // in bytes
+  file_size: number // Backend uses snake_case
+  human_file_size?: string // Backend provides human-readable size
+  filePath?: string
+  file_path?: string // Backend uses snake_case
+  downloadUrl?: string
+  download_url?: string // Backend uses snake_case
+  icon?: string
   uploadedAt: string
-  url: string
+  uploaded_at?: string // Backend uses snake_case
+  url?: string
+  createdAt?: string
+  created_at?: string // Backend uses snake_case
 }
 
 /**
@@ -40,6 +52,7 @@ export interface ReviewNote {
 export interface Project {
   id: string
   userId: string // applicant ID
+  user_id?: string // Backend uses snake_case
   title: string
   description: string
   category: ProjectCategory
@@ -47,11 +60,17 @@ export interface Project {
   documents: ProjectDocument[]
   reviewNotes: ReviewNote[]
   submittedAt?: string
+  submitted_at?: string // Backend uses snake_case
   reviewedAt?: string
+  reviewed_at?: string // Backend uses snake_case
   approvedAt?: string
+  approved_at?: string // Backend uses snake_case
   rejectedAt?: string
+  rejected_at?: string // Backend uses snake_case
   createdAt: string
+  created_at?: string // Backend uses snake_case
   updatedAt: string
+  updated_at?: string // Backend uses snake_case
 }
 
 /**
@@ -73,8 +92,11 @@ export interface ProjectListItem {
   category: ProjectCategory
   status: ProjectStatus
   createdAt: string
+  created_at?: string // Backend uses snake_case
   updatedAt: string
+  updated_at?: string // Backend uses snake_case
   submittedAt?: string
+  submitted_at?: string // Backend uses snake_case
   documentCount: number
 }
 
