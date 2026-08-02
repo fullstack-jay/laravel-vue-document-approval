@@ -321,11 +321,16 @@
           <InformationCircleIcon class="h-6 w-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
           <div>
             <h3 class="text-base font-medium text-blue-900 dark:text-blue-200 mb-1">
-              Review Completed
+              {{ project.status === 'revision' ? 'Revision Required' : 'Review Completed' }}
             </h3>
             <p class="text-sm text-blue-700 dark:text-blue-300">
-              This application has already been reviewed. The current status is
-              <span class="font-semibold">{{ project.status }}</span>.
+              <template v-if="project.status === 'revision'">
+                This application requires revision. The applicant has been notified and needs to submit the revised version before you can review again.
+              </template>
+              <template v-else>
+                This application has already been reviewed. The current status is
+                <span class="font-semibold">{{ project.status }}</span>.
+              </template>
             </p>
           </div>
         </div>
@@ -420,11 +425,12 @@ const reviewForm = reactive({
 const errors = ref<Record<string, string>>({})
 const errorMessage = ref('')
 
-// Can review if user is reviewer and project is submitted/revision
+// Can review if user is reviewer and project is submitted (NOT revision)
+// Revision status means applicant needs to revise first, reviewer cannot act
 const canReview = computed(() => {
   return project.value &&
          authStore.isReviewer &&
-         (project.value.status === 'submitted' || project.value.status === 'revision')
+         project.value.status === 'submitted'
 })
 
 async function fetchProject() {
