@@ -64,16 +64,20 @@ export const projectService = {
 
       const response = await api.get('/api/v1/projects', { params })
 
+      const projects = response.data.data || response.data.projects || []
+      const meta = response.data.meta || {}
+
       return {
-        data: response.data.data || response.data.projects || [],
+        data: projects,
         meta: {
-          currentPage: response.data.meta?.current_page || 1,
-          perPage: response.data.meta?.per_page || 10,
-          total: response.data.meta?.total || 0,
-          lastPage: response.data.meta?.last_page || 1,
+          currentPage: meta.current_page || response.data.current_page || 1,
+          perPage: meta.per_page || response.data.per_page || 10,
+          total: meta.total || response.data.total || projects.length,
+          lastPage: meta.last_page || response.data.last_page || 1,
         },
       }
     } catch (error: any) {
+      console.error('❌ Fetch projects error:', error)
       const message = error.response?.data?.message ||
                      error.response?.data?.error ||
                      error.message ||
@@ -120,11 +124,7 @@ export const projectService = {
   async getProjectById(id: string): Promise<Project> {
     try {
       const response = await api.get(`/api/v1/projects/${id}`)
-      console.log('📋 Project API Response:', response.data)
-
       const project = response.data.data || response.data
-      console.log('📋 Project data:', project)
-      console.log('📋 Documents:', project.documents)
 
       // Ensure documents array exists
       if (!project.documents) {
@@ -174,12 +174,7 @@ export const projectService = {
       formData.append('description', data.description)
       formData.append('category', data.category)
 
-      // Append documents if any
-      if (data.documents && Array.isArray(data.documents) && data.documents.length > 0) {
-        data.documents.forEach((file) => {
-          formData.append('documents[]', file)
-        })
-      }
+      // Don't append documents in create request - they'll be uploaded separately
 
       const response = await api.post('/api/v1/projects', formData, {
         headers: {
@@ -187,7 +182,14 @@ export const projectService = {
         },
       })
 
-      return response.data.data || response.data
+      const result = response.data.data || response.data
+
+      // Ensure documents array exists
+      if (!result.documents) {
+        result.documents = []
+      }
+
+      return result
     } catch (error: any) {
       const message = error.response?.data?.message ||
                      error.response?.data?.error ||

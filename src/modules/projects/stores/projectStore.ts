@@ -26,6 +26,9 @@ export const useProjectStore = defineStore('projects', () => {
     lastPage: 1,
   })
 
+  // Track locally deleted projects to handle backend sync issues
+  const locallyDeletedIds = ref<Set<string>>(new Set())
+
   // Getters
   const draftProjects = computed(() =>
     projects.value.filter(p => p.status === 'draft')
@@ -66,22 +69,20 @@ export const useProjectStore = defineStore('projects', () => {
     loading.value = true
     error.value = null
 
-    console.log('🔄 FetchProjects called with params:', params)
-
     try {
       const response = await projectService.getProjects(params)
 
-      console.log('✅ API response:', response)
-      console.log('📊 Projects count:', response.data.length)
+      // Filter out locally deleted projects to handle backend sync issues
+      const filteredProjects = response.data.filter(p => !locallyDeletedIds.value.has(p.id))
 
-      projects.value = response.data
-      pagination.value = response.meta
+      projects.value = filteredProjects
+      pagination.value = {
+        ...response.meta,
+        total: filteredProjects.length
+      }
       filter.value = params || {}
-
-      console.log('💾 Store updated, projects.value.length:', projects.value.length)
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch projects'
-      console.error('Fetch projects error:', err)
     } finally {
       loading.value = false
     }
@@ -115,19 +116,14 @@ export const useProjectStore = defineStore('projects', () => {
     loading.value = true
     error.value = null
 
-    console.log('🔄 Fetching project by ID:', id)
-
     try {
       currentProject.value = await projectService.getProjectById(id)
-      console.log('✅ Project fetched:', currentProject.value)
       return currentProject.value
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch project'
-      console.error('❌ Fetch project error:', err)
       throw err
     } finally {
       loading.value = false
-      console.log('💾 Loading set to false')
     }
   }
 
@@ -160,8 +156,7 @@ export const useProjectStore = defineStore('projects', () => {
       return newProject
     } catch (err: any) {
       error.value = err.message || 'Failed to create project'
-      console.error('Create project error:', err)
-      throw err
+            throw err
     } finally {
       loading.value = false
     }
@@ -193,8 +188,7 @@ export const useProjectStore = defineStore('projects', () => {
       return updatedProject
     } catch (err: any) {
       error.value = err.message || 'Failed to update project'
-      console.error('Update project error:', err)
-      throw err
+            throw err
     } finally {
       loading.value = false
     }
@@ -243,28 +237,29 @@ export const useProjectStore = defineStore('projects', () => {
     try {
       await projectService.deleteProject(id)
 
+      // Add to locally deleted set to handle backend sync issues
+      locallyDeletedIds.value.add(id)
+
       // Remove from local state
       projects.value = projects.value.filter(p => p.id !== id)
-      pagination.value.total--
+      pagination.value.total = Math.max(0, pagination.value.total - 1)
 
       if (currentProject.value?.id === id) {
         currentProject.value = null
       }
-
-      console.log('✅ Project deleted successfully, ID:', id)
     } catch (err: any) {
       error.value = err.message || 'Failed to delete project'
-      console.error('Delete project error:', err)
 
       // If project not found (404), it means it's already deleted
       // Remove from local state to sync with backend reality
       if (err.message?.includes('not found') || err.message?.includes('already deleted')) {
+        // Still add to locally deleted set
+        locallyDeletedIds.value.add(id)
+
         projects.value = projects.value.filter(p => p.id !== id)
         pagination.value.total = Math.max(0, pagination.value.total - 1)
 
-        // Show warning instead of error
-        console.warn('⚠️ Project already removed from server, updating local state. ID:', id)
-        // Don't throw error for this case and DON'T refresh since backend reality is clear
+        // Don't throw error for this case
         return
       }
 
