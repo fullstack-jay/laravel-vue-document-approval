@@ -51,7 +51,7 @@
             :key="notification.id"
             @click="handleNotificationClick(notification)"
             class="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0"
-            :class="{ 'bg-blue-50/50 dark:bg-blue-900/10': !(notification.is_read ?? notification.isRead) }"
+            :class="{ 'bg-blue-50/50 dark:bg-blue-900/10': isNotificationUnread(notification) }"
           >
             <!-- Icon -->
             <div
@@ -66,12 +66,12 @@
               <div class="flex items-start justify-between gap-2">
                 <p
                   class="text-sm font-medium text-gray-900 dark:text-white"
-                  :class="{ 'font-semibold': !(notification.is_read ?? notification.isRead) }"
+                  :class="{ 'font-semibold': isNotificationUnread(notification) }"
                 >
                   {{ notification.title }}
                 </p>
                 <span
-                  v-if="!(notification.is_read ?? notification.isRead)"
+                  v-if="isNotificationUnread(notification)"
                   class="flex-shrink-0 w-2 h-2 bg-primary-500 rounded-full mt-1.5"
                 ></span>
               </div>
@@ -139,17 +139,28 @@ async function handleMarkAllRead() {
 }
 
 async function handleNotificationClick(notification: any) {
-  if (!notification.isRead) {
-    await notificationStore.markAsRead(notification.id)
-  }
+  // First delete the notification, then navigate
+  await notificationStore.deleteNotification(notification.id)
 
-  // Navigate to project detail if data contains projectId
-  if (notification.data?.projectId) {
+  // Navigate to project detail if data contains projectId (support both snake_case and camelCase)
+  const projectId = notification.data?.projectId || notification.data?.project_id
+  if (projectId) {
     const isReviewer = authStore.isReviewer
-    router.push(isReviewer ? `/projects/${notification.data.projectId}/review` : `/projects/${notification.data.projectId}`)
+    router.push(isReviewer ? `/projects/${projectId}/review` : `/projects/${projectId}`)
+  } else {
+    // If no projectId, go to notifications list
+    goToNotifications()
   }
 
   closeDropdown()
+}
+
+// Helper function to check if notification is unread (supports both snake_case and camelCase)
+function isNotificationUnread(notification: any): boolean {
+  // Use OR (||) instead of nullish coalescing (??) to properly check both fields
+  const isRead = notification.isRead || notification.is_read
+  // If isRead is undefined/null, treat as unread. Otherwise check the boolean value.
+  return isRead === undefined || isRead === null ? true : !isRead
 }
 
 function goToNotifications() {

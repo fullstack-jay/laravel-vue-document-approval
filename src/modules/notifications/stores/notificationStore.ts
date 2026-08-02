@@ -19,7 +19,10 @@ export const useNotificationStore = defineStore('notification', () => {
 
   // Getters
   const unreadNotifications = computed(() =>
-    notifications.value.filter((n) => !(n.is_read ?? n.isRead))
+    notifications.value.filter((n) => {
+      const isRead = n.isRead || n.is_read
+      return isRead === undefined || isRead === null ? true : !isRead
+    })
   )
   const unreadCount = computed(() => stats.value.unread)
 

@@ -76,7 +76,7 @@
           v-for="notification in notifications"
           :key="notification.id"
           class="flex items-start gap-4 px-6 py-5 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0"
-          :class="{ 'bg-blue-50/50 dark:bg-blue-900/10': !(notification.is_read ?? notification.isRead) }"
+          :class="{ 'bg-blue-50/50 dark:bg-blue-900/10': isNotificationUnread(notification) }"
         >
           <!-- Icon -->
           <div
@@ -93,12 +93,12 @@
                 <div class="flex items-center gap-2">
                   <h3
                     class="text-base font-semibold text-gray-900 dark:text-white"
-                    :class="{ 'font-bold': !(notification.is_read ?? notification.isRead) }"
+                    :class="{ 'font-bold': isNotificationUnread(notification) }"
                   >
                     {{ notification.title }}
                   </h3>
                   <span
-                    v-if="!(notification.is_read ?? notification.isRead)"
+                    v-if="isNotificationUnread(notification)"
                     class="flex-shrink-0 px-2 py-0.5 text-xs font-medium bg-primary-100 text-primary-700 rounded-full dark:bg-primary-900/50 dark:text-primary-300"
                   >
                     New
@@ -115,7 +115,7 @@
               <!-- Actions -->
               <div class="flex items-center gap-2">
                 <button
-                  v-if="!(notification.is_read ?? notification.isRead)"
+                  v-if="isNotificationUnread(notification)"
                   @click="handleMarkAsRead(notification.id)"
                   class="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                   title="Mark as read"
@@ -134,11 +134,11 @@
 
             <!-- Action button for project-related notifications -->
             <div
-              v-if="notification.data?.projectId"
+              v-if="notification.data?.projectId || notification.data?.project_id"
               class="mt-3"
             >
               <button
-                @click="goToProject(notification.data.projectId)"
+                @click="handleViewProject(notification.id, notification.data?.projectId || notification.data?.project_id)"
                 class="inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
               >
                 <DocumentTextIcon class="w-4 h-4" />
@@ -198,7 +198,20 @@ async function handleDelete(notificationId: number) {
   }
 }
 
-function goToProject(projectId: number) {
+async function goToProject(projectId: number) {
+  // Delete the notification when clicking "View Project"
+  // Note: We need to find which notification this belongs to, but since this is called from the template
+  // we'll need to pass the notification object instead. Let's update the template.
+
+  const isReviewer = authStore.isReviewer
+  router.push(isReviewer ? `/projects/${projectId}/review` : `/projects/${projectId}`)
+}
+
+async function handleViewProject(notificationId: number, projectId: number) {
+  // Delete the notification first
+  await notificationStore.deleteNotification(notificationId)
+
+  // Then navigate
   const isReviewer = authStore.isReviewer
   router.push(isReviewer ? `/projects/${projectId}/review` : `/projects/${projectId}`)
 }
@@ -251,5 +264,13 @@ function formatDateTime(dateString: string) {
   } catch {
     return 'Invalid Date'
   }
+}
+
+// Helper function to check if notification is unread (supports both snake_case and camelCase)
+function isNotificationUnread(notification: any): boolean {
+  // Use OR (||) instead of nullish coalescing (??) to properly check both fields
+  const isRead = notification.isRead || notification.is_read
+  // If isRead is undefined/null, treat as unread. Otherwise check the boolean value.
+  return isRead === undefined || isRead === null ? true : !isRead
 }
 </script>
