@@ -240,6 +240,17 @@ export const projectService = {
     try {
       await api.delete(`/api/v1/projects/${id}`)
     } catch (error: any) {
+      // Handle specific error cases
+      if (error.response?.status === 404) {
+        throw new Error('Project not found. It may have been already deleted.')
+      }
+      if (error.response?.status === 403) {
+        throw new Error('You do not have permission to delete this project.')
+      }
+      if (error.response?.status === 422) {
+        throw new Error('Cannot delete project. It may not be in draft status.')
+      }
+
       const message = error.response?.data?.message ||
                      error.response?.data?.error ||
                      error.message ||

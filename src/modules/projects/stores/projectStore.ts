@@ -239,6 +239,9 @@ export const useProjectStore = defineStore('projects', () => {
       if (currentProject.value?.id === id) {
         currentProject.value = null
       }
+
+      // Refresh the list to ensure sync with backend
+      await fetchProjects()
     } catch (err: any) {
       error.value = err.message || 'Failed to delete project'
       console.error('Delete project error:', err)
