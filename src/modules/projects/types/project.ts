@@ -89,8 +89,11 @@ export interface ProjectFormData {
 export interface ProjectListItem {
   id: string
   title: string
+  description?: string
   category: ProjectCategory
   status: ProjectStatus
+  status_label?: string // Backend provides human-readable label
+  status_color?: string // Backend provides color indicator
   createdAt: string
   created_at?: string // Backend uses snake_case
   updatedAt: string

@@ -6,10 +6,16 @@
       :subtitle="isReviewer ? 'Review and evaluate submitted applications' : 'Manage and track your document submissions'"
     >
       <template #actions>
-        <AppButton v-if="!isReviewer" @click="router.push('/projects/create')" size="md">
-          <PlusIcon class="h-5 w-5 mr-2" />
-          New Project
-        </AppButton>
+        <div class="flex gap-2">
+          <AppButton @click="handleRefresh" variant="secondary" size="md">
+            <ArrowPathIcon class="h-5 w-5 mr-2" />
+            Refresh
+          </AppButton>
+          <AppButton v-if="!isReviewer" @click="router.push('/projects/create')" size="md">
+            <PlusIcon class="h-5 w-5 mr-2" />
+            New Project
+          </AppButton>
+        </div>
       </template>
     </PageHeader>
 
@@ -90,7 +96,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProjectStore } from '@/modules/projects/stores/projectStore'
 import { useAuthStore } from '@/modules/auth/stores/authStore'
-import { PlusIcon } from '@heroicons/vue/24/outline'
+import { PlusIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
 import PageHeader from '@/components/common/PageHeader.vue'
 import AppButton from '@/components/common/AppButton.vue'
 import LoadingSkeleton from '@/components/common/LoadingSkeleton.vue'
@@ -160,6 +166,10 @@ function getEmptyMessage(): string {
     rejected: 'No rejected projects',
   }
   return applicantMessages[currentFilter.value] || applicantMessages.all
+}
+
+function handleRefresh() {
+  handleFilterChange(currentFilter.value)
 }
 
 async function handleFilterChange(status: ProjectStatus | 'all') {
