@@ -16,7 +16,7 @@
           Sign in
         </h1>
         <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-medium mt-2">
-          Selamat datang di portal Document Approval
+          Selamat datang di portal Kementrian Lingkungan Hidup
         </p>
       </div>
     </div>
