@@ -80,8 +80,8 @@ provide('setLoading', setLoading)
 onMounted(() => {
   console.log('lottieSrc.value:', lottieSrc.value)
 
-  // Don't fetch the file, just show loading for 1 second
-  // This avoids the fetch error and allows page to load
+  // Set animation as loaded and show initial loading for 1 second
+  animationLoaded.value = true
   setTimeout(() => {
     isInitialLoading.value = false
   }, 1000)
