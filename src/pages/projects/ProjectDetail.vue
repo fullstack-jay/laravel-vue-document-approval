@@ -89,7 +89,7 @@
             Documents
           </p>
           <p class="text-base font-medium text-gray-900 dark:text-white">
-            {{ project.documents?.length || 0 }} file(s)
+            {{ documents.length }} file(s)
           </p>
         </div>
       </div>
@@ -110,9 +110,9 @@
           Supporting Documents
         </h2>
 
-        <div v-if="project.documents?.length > 0" class="space-y-3">
+        <div v-if="documents.length > 0" class="space-y-3">
           <div
-            v-for="doc in project.documents || []"
+            v-for="doc in documents"
             :key="doc.id"
             class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600 transition-colors"
           >
@@ -154,7 +154,7 @@
 
       <!-- Review Notes Card (if any) -->
       <div
-        v-if="project.reviewNotes?.length > 0"
+        v-if="reviewNotes.length > 0"
         class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 mb-8"
       >
         <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6">
@@ -163,7 +163,7 @@
 
         <div class="space-y-6">
           <div
-            v-for="note in project.reviewNotes || []"
+            v-for="note in reviewNotes"
             :key="note.id"
             class="rounded-lg border p-6 mt-3"
             :class="getNoteClasses(note.type)"
@@ -269,6 +269,11 @@ const authStore = useAuthStore()
 const project = ref<Project | null>(null)
 const loading = ref(true)
 const isSubmitting = ref(false)
+
+// Safe computed properties with defaults
+const safeProject = computed(() => project.value)
+const documents = computed(() => project.value?.documents || [])
+const reviewNotes = computed(() => project.value?.reviewNotes || [])
 
 const canEdit = computed(() => {
   return project.value && project.value.status === 'draft' && authStore.isApplicant

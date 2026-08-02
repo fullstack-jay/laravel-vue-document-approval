@@ -120,7 +120,23 @@ export const projectService = {
   async getProjectById(id: string): Promise<Project> {
     try {
       const response = await api.get(`/api/v1/projects/${id}`)
-      return response.data.data || response.data
+      console.log('📋 Project API Response:', response.data)
+
+      const project = response.data.data || response.data
+      console.log('📋 Project data:', project)
+      console.log('📋 Documents:', project.documents)
+
+      // Ensure documents array exists
+      if (!project.documents) {
+        project.documents = []
+      }
+
+      // Ensure reviewNotes array exists
+      if (!project.reviewNotes) {
+        project.reviewNotes = []
+      }
+
+      return project
     } catch (error: any) {
       const message = error.response?.data?.message ||
                      error.response?.data?.error ||
