@@ -11,7 +11,7 @@
             {{ project.title }}
           </h3>
           <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            {{ formatDate(project.createdAt) }}
+            {{ formatDate(project.created_at || project.createdAt) }}
           </p>
         </div>
         <StatusBadge :status="project.status" />
@@ -95,17 +95,22 @@ const emit = defineEmits<{
 const router = useRouter()
 
 function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24))
+  if (!dateString) return 'Invalid Date'
 
-  if (diffInDays === 0) {
-    return 'Today'
-  } else if (diffInDays === 1) {
-    return 'Yesterday'
-  } else if (diffInDays < 7) {
-    return `${diffInDays} days ago`
-  } else if (diffInDays < 30) {
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return 'Invalid Date'
+
+    const now = new Date()
+    const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24))
+
+    if (diffInDays === 0) {
+      return 'Today'
+    } else if (diffInDays === 1) {
+      return 'Yesterday'
+    } else if (diffInDays < 7) {
+      return `${diffInDays} days ago`
+    } else if (diffInDays < 30) {
     return `${Math.floor(diffInDays / 7)} weeks ago`
   } else {
     return date.toLocaleDateString()

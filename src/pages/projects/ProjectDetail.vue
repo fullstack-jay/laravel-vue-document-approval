@@ -28,7 +28,7 @@
               <StatusBadge :status="project.status" />
             </div>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              Created on {{ formatDate(project.createdAt) }}
+              Created on {{ formatDate(project.created_at || project.createdAt) }}
             </p>
           </div>
 
@@ -120,10 +120,10 @@
               <DocumentIcon class="h-5 w-5 text-gray-400" />
               <div>
                 <p class="text-sm font-medium text-gray-700 dark:text-gray-200">
-                  {{ doc.fileName }}
+                  {{ doc.file_name || doc.fileName }}
                 </p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ formatFileSize(doc.fileSize) }}
+                  {{ doc.human_file_size || formatFileSize(doc.file_size || doc.fileSize) }}
                 </p>
               </div>
             </div>
@@ -199,30 +199,31 @@
 
         <div class="space-y-5">
           <TimelineItem
+            v-if="project.created_at || project.createdAt"
             label="Created"
-            :date="project.createdAt || undefined"
+            :date="project.created_at || project.createdAt"
             :is-first="true"
           />
           <TimelineItem
-            v-if="project.submittedAt"
+            v-if="project.submitted_at || project.submittedAt"
             label="Submitted"
-            :date="project.submittedAt"
+            :date="project.submitted_at || project.submittedAt"
           />
           <TimelineItem
-            v-if="project.reviewedAt"
+            v-if="project.reviewed_at || project.reviewedAt"
             label="Reviewed"
-            :date="project.reviewedAt"
+            :date="project.reviewed_at || project.reviewedAt"
           />
           <TimelineItem
-            v-if="project.approvedAt"
+            v-if="project.approved_at || project.approvedAt"
             label="Approved"
-            :date="project.approvedAt"
+            :date="project.approved_at || project.approvedAt"
             :is-success="true"
           />
           <TimelineItem
-            v-if="project.rejectedAt"
+            v-if="project.rejected_at || project.rejectedAt"
             label="Rejected"
-            :date="project.rejectedAt"
+            :date="project.rejected_at || project.rejectedAt"
             :is-error="true"
           />
         </div>
@@ -291,20 +292,14 @@ const canDelete = computed(() => {
 
 async function fetchProject() {
   loading.value = true
-  console.log('🔄 ProjectDetail: Fetching project...')
 
   try {
     const id = route.params.id as string
-    console.log('📍 Project ID from route:', id)
-
     project.value = await projectStore.fetchProjectById(id)
-
-    console.log('✅ ProjectDetail: Project loaded', project.value)
   } catch (error) {
-    console.error('❌ ProjectDetail: Failed to fetch project:', error)
+    // Error is handled by the store
   } finally {
     loading.value = false
-    console.log('💾 ProjectDetail: Loading set to false')
   }
 }
 
@@ -341,12 +336,35 @@ async function handleDelete() {
 }
 
 function handleDownload(doc: ProjectDocument) {
-  // Mock download
-  alert(`Downloading ${doc.fileName}...`)
+  // Use backend download URL if available, otherwise mock download
+  const downloadUrl = doc.download_url || doc.downloadUrl || doc.url
+  const fileName = doc.file_name || doc.fileName
+
+  if (downloadUrl) {
+    // Open download URL in new tab
+    window.open(downloadUrl, '_blank')
+  } else {
+    alert(`Downloading ${fileName}...`)
+  }
 }
 
 function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleString()
+  if (!dateString) return 'Invalid Date'
+
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return 'Invalid Date'
+
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  } catch {
+    return 'Invalid Date'
+  }
 }
 
 function formatFileSize(bytes: number): string {
