@@ -138,7 +138,7 @@ export const useProjectStore = defineStore('projects', () => {
         status: newProject.status,
         createdAt: newProject.createdAt,
         updatedAt: newProject.updatedAt,
-        documentCount: newProject.documents.length,
+        documentCount: newProject.documents?.length || 0,
       }
 
       projects.value.unshift(listItem)

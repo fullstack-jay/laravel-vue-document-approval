@@ -159,7 +159,7 @@ export const projectService = {
       formData.append('category', data.category)
 
       // Append documents if any
-      if (data.documents && data.documents.length > 0) {
+      if (data.documents && Array.isArray(data.documents) && data.documents.length > 0) {
         data.documents.forEach((file) => {
           formData.append('documents[]', file)
         })
