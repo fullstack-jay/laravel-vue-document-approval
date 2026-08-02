@@ -55,6 +55,10 @@ export const notificationService = {
           page,
           per_page: perPage,
         },
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
       })
 
       return {
@@ -77,7 +81,12 @@ export const notificationService = {
 
   async getNotificationStats(): Promise<NotificationStats> {
     try {
-      const response = await api.get('/api/v1/notifications/stats')
+      const response = await api.get('/api/v1/notifications/stats', {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      })
       const data = response.data.data || response.data
 
       return {

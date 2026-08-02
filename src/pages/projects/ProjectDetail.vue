@@ -253,6 +253,7 @@ import StatusBadge from '@/components/common/StatusBadge.vue'
 import LoadingSkeleton from '@/components/common/LoadingSkeleton.vue'
 import AppButton from '@/components/common/AppButton.vue'
 import TimelineItem from '@/components/projects/TimelineItem.vue'
+import { useNotificationStore } from '@/modules/notifications/stores/notificationStore'
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -313,6 +314,11 @@ async function handleSubmit() {
   try {
     await projectStore.submitProject(project.value.id)
     await fetchProject()
+
+    // Refresh notifications to get latest count
+    const notificationStore = useNotificationStore()
+    await notificationStore.fetchStats()
+
     alert('Project submitted successfully!')
   } catch (error: any) {
     alert(error.message || 'Failed to submit project')

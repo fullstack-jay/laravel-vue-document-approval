@@ -51,7 +51,7 @@
             :key="notification.id"
             @click="handleNotificationClick(notification)"
             class="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0"
-            :class="{ 'bg-blue-50/50 dark:bg-blue-900/10': !notification.isRead }"
+            :class="{ 'bg-blue-50/50 dark:bg-blue-900/10': !(notification.is_read ?? notification.isRead) }"
           >
             <!-- Icon -->
             <div
@@ -66,12 +66,12 @@
               <div class="flex items-start justify-between gap-2">
                 <p
                   class="text-sm font-medium text-gray-900 dark:text-white"
-                  :class="{ 'font-semibold': !notification.isRead }"
+                  :class="{ 'font-semibold': !(notification.is_read ?? notification.isRead) }"
                 >
                   {{ notification.title }}
                 </p>
                 <span
-                  v-if="!notification.isRead"
+                  v-if="!(notification.is_read ?? notification.isRead)"
                   class="flex-shrink-0 w-2 h-2 bg-primary-500 rounded-full mt-1.5"
                 ></span>
               </div>
@@ -79,7 +79,7 @@
                 {{ notification.message }}
               </p>
               <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                {{ formatTime(notification.createdAt) }}
+                {{ formatTime(notification.created_at || notification.createdAt) }}
               </p>
             </div>
           </div>
@@ -184,19 +184,27 @@ function iconClass(category: string) {
 }
 
 function formatTime(dateString: string) {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60000)
-  const diffHours = Math.floor(diffMs / 3600000)
-  const diffDays = Math.floor(diffMs / 86400000)
+  if (!dateString) return 'Invalid Date'
 
-  if (diffMins < 1) return 'Just now'
-  if (diffMins < 60) return `${diffMins}m ago`
-  if (diffHours < 24) return `${diffHours}h ago`
-  if (diffDays === 1) return 'Yesterday'
-  if (diffDays < 7) return `${diffDays}d ago`
-  return date.toLocaleDateString()
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return 'Invalid Date'
+
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+
+    if (diffMins < 1) return 'Just now'
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffHours < 24) return `${diffHours}h ago`
+    if (diffDays === 1) return 'Yesterday'
+    if (diffDays < 7) return `${diffDays}d ago`
+    return date.toLocaleDateString()
+  } catch {
+    return 'Invalid Date'
+  }
 }
 
 // Close dropdown when clicking outside

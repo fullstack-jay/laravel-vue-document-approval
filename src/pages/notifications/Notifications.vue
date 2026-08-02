@@ -76,7 +76,7 @@
           v-for="notification in notifications"
           :key="notification.id"
           class="flex items-start gap-4 px-6 py-5 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0"
-          :class="{ 'bg-blue-50/50 dark:bg-blue-900/10': !notification.isRead }"
+          :class="{ 'bg-blue-50/50 dark:bg-blue-900/10': !(notification.is_read ?? notification.isRead) }"
         >
           <!-- Icon -->
           <div
@@ -93,12 +93,12 @@
                 <div class="flex items-center gap-2">
                   <h3
                     class="text-base font-semibold text-gray-900 dark:text-white"
-                    :class="{ 'font-bold': !notification.isRead }"
+                    :class="{ 'font-bold': !(notification.is_read ?? notification.isRead) }"
                   >
                     {{ notification.title }}
                   </h3>
                   <span
-                    v-if="!notification.isRead"
+                    v-if="!(notification.is_read ?? notification.isRead)"
                     class="flex-shrink-0 px-2 py-0.5 text-xs font-medium bg-primary-100 text-primary-700 rounded-full dark:bg-primary-900/50 dark:text-primary-300"
                   >
                     New
@@ -108,14 +108,14 @@
                   {{ notification.message }}
                 </p>
                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-500">
-                  {{ formatDateTime(notification.createdAt) }}
+                  {{ formatDateTime(notification.created_at || notification.createdAt) }}
                 </p>
               </div>
 
               <!-- Actions -->
               <div class="flex items-center gap-2">
                 <button
-                  v-if="!notification.isRead"
+                  v-if="!(notification.is_read ?? notification.isRead)"
                   @click="handleMarkAsRead(notification.id)"
                   class="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                   title="Mark as read"
@@ -230,18 +230,26 @@ function iconClass(category: string) {
 }
 
 function formatDateTime(dateString: string) {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60000)
-  const diffHours = Math.floor(diffMs / 3600000)
-  const diffDays = Math.floor(diffMs / 86400000)
+  if (!dateString) return 'Invalid Date'
 
-  if (diffMins < 1) return 'Just now'
-  if (diffMins < 60) return `${diffMins} minutes ago`
-  if (diffHours < 24) return `${diffHours} hours ago`
-  if (diffDays === 1) return 'Yesterday at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  if (diffDays < 7) return `${diffDays} days ago`
-  return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return 'Invalid Date'
+
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+
+    if (diffMins < 1) return 'Just now'
+    if (diffMins < 60) return `${diffMins} minutes ago`
+    if (diffHours < 24) return `${diffHours} hours ago`
+    if (diffDays === 1) return 'Yesterday at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    if (diffDays < 7) return `${diffDays} days ago`
+    return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  } catch {
+    return 'Invalid Date'
+  }
 }
 </script>
