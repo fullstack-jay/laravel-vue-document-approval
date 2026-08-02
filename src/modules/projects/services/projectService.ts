@@ -103,11 +103,6 @@ export const projectService = {
 
       const response = await api.get('/api/v1/reviewer/projects', { params })
 
-      // Debug: log detailed pagination info
-      console.log('Reviewer projects response:', response.data)
-      console.log('Meta details:', response.data.meta)
-      console.log('Last page:', response.data.meta?.last_page)
-
       const projects = response.data.data || response.data.projects || []
       const meta = response.data.meta || {}
 

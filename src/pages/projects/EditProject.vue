@@ -125,7 +125,7 @@
                 ref="fileInput"
                 type="file"
                 multiple
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
                 class="hidden"
                 @change="handleFileSelect"
               />
@@ -134,7 +134,7 @@
                 Click to upload or drag and drop files here
               </p>
               <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                PDF, DOC, DOCX, JPG, PNG (Max 10MB each)
+                PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX (Max 10MB each)
               </p>
             </div>
 
@@ -276,7 +276,6 @@ async function fetchProject() {
     // Load existing documents
     existingDocuments.value = project.value.documents || []
   } catch (error) {
-    console.error('Failed to fetch project:', error)
     project.value = null
   } finally {
     loading.value = false
@@ -347,17 +346,20 @@ function addFiles(files: File[]) {
       alert(`File "${file.name}" is too large. Maximum size is 10MB.`)
       continue
     }
-    // Validate file type
+    // Validate file type - backend accepts: pdf, doc, docx, xls, xlsx, ppt, pptx
     const validTypes = [
       'application/pdf',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'image/jpeg',
-      'image/jpg',
-      'image/png'
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation'
     ]
-    if (!validTypes.includes(file.type) && !file.name.match(/\.(pdf|doc|docx|jpg|jpeg|png)$/i)) {
-      alert(`File "${file.name}" has invalid type. Please upload PDF, DOC, DOCX, JPG, or PNG.`)
+    const validExtensions = /\.(pdf|doc|docx|xls|xlsx|ppt|pptx)$/i
+
+    if (!validTypes.includes(file.type) && !file.name.match(validExtensions)) {
+      alert(`File "${file.name}" has invalid type. Please upload PDF, DOC, DOCX, XLS, XLSX, PPT, or PPTX.`)
       continue
     }
     newDocuments.value.push(file)
