@@ -164,6 +164,7 @@
 import { ref, reactive, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProjectStore } from '@/modules/projects/stores/projectStore'
+import { projectService } from '@/modules/projects/services/projectService'
 import PageHeader from '@/components/common/PageHeader.vue'
 import Card from '@/components/common/Card.vue'
 import AppInput from '@/components/common/AppInput.vue'
@@ -223,9 +224,27 @@ async function handleSubmit() {
   try {
     setLoading(true)
 
-    form.documents = uploadedFiles.value
+    // Step 1: Create project first without documents
+    const projectData = {
+      title: form.title,
+      description: form.description,
+      category: form.category,
+      documents: [] // Don't send documents in create request
+    }
 
-    const project = await projectStore.createProject(form)
+    const project = await projectStore.createProject(projectData)
+
+    // Step 2: Upload documents one by one to the created project
+    if (uploadedFiles.value.length > 0) {
+      for (let i = 0; i < uploadedFiles.value.length; i++) {
+        const file = uploadedFiles.value[i]
+        try {
+          await projectService.uploadDocument(project.id, file)
+        } catch (uploadError: any) {
+          // Continue with next file even if one fails
+        }
+      }
+    }
 
     // Show success message (you can add toast here)
     alert('Project created successfully!')
@@ -252,9 +271,27 @@ async function handleSaveDraft() {
   try {
     setLoading(true)
 
-    form.documents = uploadedFiles.value
+    // Step 1: Create project first without documents
+    const projectData = {
+      title: form.title,
+      description: form.description,
+      category: form.category,
+      documents: [] // Don't send documents in create request
+    }
 
-    const project = await projectStore.createProject(form)
+    const project = await projectStore.createProject(projectData)
+
+    // Step 2: Upload documents one by one to the created project
+    if (uploadedFiles.value.length > 0) {
+      for (let i = 0; i < uploadedFiles.value.length; i++) {
+        const file = uploadedFiles.value[i]
+        try {
+          await projectService.uploadDocument(project.id, file)
+        } catch (uploadError: any) {
+          // Continue with next file even if one fails
+        }
+      }
+    }
 
     alert('Draft saved successfully!')
 
