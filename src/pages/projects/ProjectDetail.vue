@@ -59,6 +59,18 @@
               <TrashIcon class="h-4 w-4 mr-2" />
               Delete
             </button>
+            <button
+              @click="handleExportPDF"
+              :disabled="isExportingPDF"
+              class="inline-flex items-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <DocumentArrowDownIcon v-if="!isExportingPDF" class="h-4 w-4 mr-2" />
+              <svg v-else class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ isExportingPDF ? 'Exporting...' : 'Export PDF' }}
+            </button>
           </div>
         </div>
       </div>
@@ -294,8 +306,10 @@ import {
   DocumentIcon,
   ArrowDownTrayIcon,
   ChatBubbleLeftRightIcon,
+  DocumentArrowDownIcon,
 } from '@heroicons/vue/24/outline'
 import { showSuccessAlert, showErrorAlert, showConfirmAlert, showToast } from '@/composables/useSweetAlert'
+import { useFileExport } from '@/composables/useFileExport'
 
 const router = useRouter()
 const route = useRoute()
@@ -305,6 +319,9 @@ const authStore = useAuthStore()
 const project = ref<Project | null>(null)
 const loading = ref(true)
 const isSubmitting = ref(false)
+
+// File export functionality
+const { isExporting: isExportingPDF, errorMessage: exportError, exportPDF } = useFileExport()
 
 // Computed property to combine review notes from both naming conventions
 const allReviewNotes = computed(() => {
@@ -354,8 +371,6 @@ async function fetchProject() {
 
 function handleEdit() {
   if (!project.value) return
-  // Mark as edited when user clicks Edit button
-  hasEdited.value = true
   router.push(`/projects/${project.value.id}/edit`)
 }
 
@@ -419,6 +434,13 @@ function handleDownload(doc: ProjectDocument) {
   } else {
     showToast('Download not available for this document', 'warning')
   }
+}
+
+async function handleExportPDF() {
+  if (!project.value) return
+
+  const filename = `${project.value.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_project.pdf`
+  await exportPDF(project.value.id, filename)
 }
 
 function formatDate(dateString: string): string {
