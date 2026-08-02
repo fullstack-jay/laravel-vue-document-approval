@@ -55,10 +55,11 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     try {
       const response = await authService.register(data)
-      user.value = response.user
-      token.value = response.token
-      localStorage.setItem('access_token', response.token)
-      localStorage.setItem('user_data', JSON.stringify(response.user))
+
+      // DO NOT store token/user after registration
+      // User must login manually after registration
+      // This prevents automatic redirect to dashboard
+
       return response
     } catch (err: any) {
       error.value = err.message
