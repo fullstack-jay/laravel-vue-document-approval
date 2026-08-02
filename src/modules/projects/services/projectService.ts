@@ -96,17 +96,28 @@ export const projectService = {
       if (filter?.status) params.status = filter.status
       if (filter?.search) params.search = filter.search
       if (filter?.page) params.page = filter.page
-      if (filter?.perPage) params.per_page = filter.perPage
+
+      // Always set per_page to enable pagination
+      // Use filter.perPage if provided, otherwise default to 10
+      params.per_page = filter?.perPage || 10
 
       const response = await api.get('/api/v1/reviewer/projects', { params })
 
+      // Debug: log detailed pagination info
+      console.log('Reviewer projects response:', response.data)
+      console.log('Meta details:', response.data.meta)
+      console.log('Last page:', response.data.meta?.last_page)
+
+      const projects = response.data.data || response.data.projects || []
+      const meta = response.data.meta || {}
+
       return {
-        data: response.data.data || response.data.projects || [],
+        data: projects,
         meta: {
-          currentPage: response.data.meta?.current_page || 1,
-          perPage: response.data.meta?.per_page || 10,
-          total: response.data.meta?.total || 0,
-          lastPage: response.data.meta?.last_page || 1,
+          currentPage: meta.current_page || response.data.current_page || 1,
+          perPage: meta.per_page || response.data.per_page || 10,
+          total: meta.total || response.data.total || 0,
+          lastPage: meta.last_page || response.data.last_page || 1,
         },
       }
     } catch (error: any) {
