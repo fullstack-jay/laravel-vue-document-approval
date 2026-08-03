@@ -110,6 +110,8 @@ export interface ProjectFilter {
   status?: ProjectStatus
   category?: ProjectCategory
   search?: string
+  page?: number
+  perPage?: number
 }
 
 /**

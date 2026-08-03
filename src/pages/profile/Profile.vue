@@ -265,7 +265,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useProfileStore } from '@/modules/profile/stores/profileStore'
-import { useAuthStore } from '@/modules/auth/stores/authStore'
 import AppInput from '@/components/common/AppInput.vue'
 import AppButton from '@/components/common/AppButton.vue'
 import LoadingSkeleton from '@/components/common/LoadingSkeleton.vue'
@@ -274,7 +273,6 @@ import type { ProfileFormData, PasswordChangeData } from '@/modules/profile/type
 import { showSuccessAlert, showErrorAlert, showToast } from '@/composables/useSweetAlert'
 
 const profileStore = useProfileStore()
-const authStore = useAuthStore()
 
 const profile = ref(profileStore.profile)
 const loading = ref(false)

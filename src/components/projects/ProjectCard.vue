@@ -86,7 +86,7 @@ const props = defineProps<{
   isReviewer?: boolean
 }>()
 
-const emit = defineEmits<{
+defineEmits<{
   click: [id: string]
   edit: [id: string]
   delete: [id: string]

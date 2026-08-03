@@ -1,12 +1,11 @@
 import axios from 'axios'
 import type {
   Project,
-  ProjectListItem,
   ProjectFormData,
   ProjectFilter,
   PaginatedProjects,
   ProjectStatus,
-  Document,
+  ProjectDocument,
 } from '../types/project'
 
 // Create axios instance for project API calls
@@ -286,7 +285,7 @@ export const projectService = {
   /**
    * Upload document to project
    */
-  async uploadDocument(projectId: string, file: File): Promise<Document> {
+  async uploadDocument(projectId: string, file: File): Promise<ProjectDocument> {
     try {
       const formData = new FormData()
       formData.append('document', file)
@@ -310,7 +309,7 @@ export const projectService = {
   /**
    * Delete document from project
    */
-  async deleteDocument(projectId: string, documentId: string): Promise<void> {
+  async deleteDocument(_projectId: string, documentId: string): Promise<void> {
     try {
       await api.delete(`/api/v1/documents/${documentId}`)
     } catch (error: any) {

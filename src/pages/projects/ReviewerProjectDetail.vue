@@ -355,7 +355,7 @@
           />
           <!-- Review Notes in Timeline -->
           <div
-            v-for="note in (project.reviewNotes || project.review_notes || [])"
+            v-for="note in (project.reviewNotes || (project as any).review_notes || [])"
             :key="note.id"
             class="flex items-start space-x-4"
           >

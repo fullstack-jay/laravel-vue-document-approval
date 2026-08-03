@@ -115,7 +115,7 @@
               <span class="text-gray-500 font-normal">(Optional)</span>
             </label>
             <div
-              @click="$refs.fileInput?.click()"
+              @click="fileInputRef?.click()"
               @drop.prevent="handleFileDrop"
               @dragover.prevent
               class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-primary-500 dark:hover:border-primary-500 transition-colors"
@@ -235,6 +235,7 @@ const errors = ref<Record<string, string>>({})
 const existingDocuments = ref<any[]>([])
 const newDocuments = ref<File[]>([])
 const isDragging = ref(false)
+const fileInputRef = ref<HTMLInputElement | null>(null)
 
 const form = reactive<ProjectFormData>({
   title: '',

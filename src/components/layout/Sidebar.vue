@@ -54,7 +54,6 @@ import { computed } from 'vue'
 import { useAuthStore } from '@/modules/auth/stores/authStore'
 import {
   HomeIcon,
-  DocumentTextIcon,
   FolderOpenIcon,
   ClipboardDocumentListIcon,
   XMarkIcon,
@@ -62,7 +61,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import SidebarLink from './SidebarLink.vue'
 
-defineEmits<{
+const emit = defineEmits<{
   close: []
 }>()
 

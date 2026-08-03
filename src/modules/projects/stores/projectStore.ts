@@ -404,7 +404,7 @@ export const useProjectStore = defineStore('projects', () => {
       // Update current project documents list
       if (currentProject.value && currentProject.value.documents) {
         currentProject.value.documents = currentProject.value.documents.filter(
-          doc => doc.id !== documentId && doc.documentId !== documentId
+          doc => String(doc.id) !== String(documentId)
         )
       }
     } catch (err: any) {

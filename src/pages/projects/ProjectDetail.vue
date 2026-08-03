@@ -321,17 +321,17 @@ const loading = ref(true)
 const isSubmitting = ref(false)
 
 // File export functionality
-const { isExporting: isExportingPDF, errorMessage: exportError, exportPDF } = useFileExport()
+const { isExporting: isExportingPDF, exportPDF } = useFileExport()
 
 // Computed property to combine review notes from both naming conventions
 const allReviewNotes = computed(() => {
-  const notes = project.value?.review_notes || project.value?.reviewNotes || []
+  // Use type assertion to handle both snake_case and camelCase from backend
+  const notes = (project.value as any)?.review_notes || project.value?.reviewNotes || []
   // Ensure it's always an array
   return Array.isArray(notes) ? notes : []
 })
 
 // Safe computed properties with defaults
-const safeProject = computed(() => project.value)
 const documents = computed(() => project.value?.documents || [])
 const reviewNotes = computed(() => project.value?.reviewNotes || [])
 
@@ -359,9 +359,10 @@ const canDelete = computed(() => {
 async function fetchProject() {
   loading.value = true
 
-  try {
-    const id = route.params.id as string
+  // Declare id outside try-catch so it's accessible in catch block
+  const id = route.params.id as string
 
+  try {
     // Check if currentProject in store matches the requested ID
     if (projectStore.currentProject && String(projectStore.currentProject.id) === String(id)) {
       project.value = projectStore.currentProject

@@ -154,7 +154,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNotificationStore } from '@/modules/notifications/stores/notificationStore'
 import { useAuthStore } from '@/modules/auth/stores/authStore'
@@ -202,15 +202,6 @@ async function handleDelete(notificationId: number) {
   if (result.isConfirmed) {
     await notificationStore.deleteNotification(notificationId)
   }
-}
-
-async function goToProject(projectId: number) {
-  // Delete the notification when clicking "View Project"
-  // Note: We need to find which notification this belongs to, but since this is called from the template
-  // we'll need to pass the notification object instead. Let's update the template.
-
-  const isReviewer = authStore.isReviewer
-  router.push(isReviewer ? `/projects/${projectId}/review` : `/projects/${projectId}`)
 }
 
 async function handleViewProject(notificationId: number, projectId: number) {

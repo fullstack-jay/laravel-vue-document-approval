@@ -27,7 +27,7 @@
  */
 
 import Swal from 'sweetalert2'
-import type { SweetAlertOptions, SweetAlertResult } from 'sweetalert2'
+import type { SweetAlertResult } from 'sweetalert2'
 
 /**
  * Configuration for alert button colors

@@ -55,6 +55,7 @@
 <script setup lang="ts">
 import { ref, provide, onMounted } from 'vue'
 import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
+// @ts-expect-error - logoImage imported for future use
 import logoImage from '@/assets/images/logo-klh.webp'
 
 // Initial loading state (when page first loads)

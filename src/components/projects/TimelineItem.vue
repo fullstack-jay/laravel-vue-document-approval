@@ -30,7 +30,7 @@ import { CheckIcon, XMarkIcon, ClockIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps<{
   label: string
-  date: string
+  date?: string // Make optional to handle cases where date might be undefined
   isFirst?: boolean
   isSuccess?: boolean
   isError?: boolean
@@ -42,7 +42,7 @@ const bgClass = computed(() => {
   return 'bg-gray-100 dark:bg-gray-700'
 })
 
-function formatDate(dateString: string): string {
+function formatDate(dateString?: string): string {
   if (!dateString) return 'Invalid Date'
 
   try {

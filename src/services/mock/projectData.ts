@@ -8,18 +8,24 @@ export const mockDocuments: Record<string, ProjectDocument[]> = {
     {
       id: 'doc1',
       projectId: '1',
-      fileName: 'Surat_Permohonan.pdf',
-      fileType: 'pdf',
-      fileSize: 2456000,
+      file_name: 'Surat_Permohonan.pdf',
+      fileName: 'Surat_Permohonan.pdf', // Keep for backward compatibility
+      file_type: 'pdf',
+      fileType: 'pdf', // Keep for backward compatibility
+      file_size: 2456000,
+      fileSize: 2456000, // Keep for backward compatibility
       uploadedAt: '2026-01-15T10:30:00Z',
       url: '/documents/surat-permohonan-1.pdf',
     },
     {
       id: 'doc2',
       projectId: '1',
-      fileName: 'Proposal_Kegiatan.pdf',
-      fileType: 'pdf',
-      fileSize: 3890000,
+      file_name: 'Proposal_Kegiatan.pdf',
+      fileName: 'Proposal_Kegiatan.pdf', // Keep for backward compatibility
+      file_type: 'pdf',
+      fileType: 'pdf', // Keep for backward compatibility
+      file_size: 3890000,
+      fileSize: 3890000, // Keep for backward compatibility
       uploadedAt: '2026-01-15T10:35:00Z',
       url: '/documents/proposal-kegiatan-1.pdf',
     },
@@ -28,9 +34,12 @@ export const mockDocuments: Record<string, ProjectDocument[]> = {
     {
       id: 'doc3',
       projectId: '2',
-      fileName: 'Dokumen_Pendukung.pdf',
-      fileType: 'pdf',
-      fileSize: 1560000,
+      file_name: 'Dokumen_Pendukung.pdf',
+      fileName: 'Dokumen_Pendukung.pdf', // Keep for backward compatibility
+      file_type: 'pdf',
+      fileType: 'pdf', // Keep for backward compatibility
+      file_size: 1560000,
+      fileSize: 1560000, // Keep for backward compatibility
       uploadedAt: '2026-01-16T14:20:00Z',
       url: '/documents/dokumen-pendukung-2.pdf',
     },

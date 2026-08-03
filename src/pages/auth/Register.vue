@@ -128,7 +128,7 @@ async function handleRegister() {
 
   try {
     setLoading(true)
-    const response = await authStore.register({
+    await authStore.register({
       name: form.value.name,
       email: form.value.email,
       password: form.value.password,

@@ -174,7 +174,6 @@
 import { ref, reactive, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProjectStore } from '@/modules/projects/stores/projectStore'
-import { projectService } from '@/modules/projects/services/projectService'
 import PageHeader from '@/components/common/PageHeader.vue'
 import Card from '@/components/common/Card.vue'
 import AppInput from '@/components/common/AppInput.vue'

@@ -153,7 +153,7 @@ const currentFilter = ref<ProjectStatus | 'all'>('all')
 const loading = ref(false)
 
 // File export functionality
-const { isExporting: isExportingExcel, errorMessage: exportError, exportExcel } = useFileExport()
+const { isExporting: isExportingExcel, exportExcel } = useFileExport()
 
 const allTabs = [
   { label: 'All', value: 'all' as const },
@@ -199,8 +199,6 @@ const displayedPages = computed(() => {
 
   const range = []
   const rangeWithDots = []
-  let hasLeftDot = false
-  let hasRightDot = false
 
   for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
     range.push(i)
@@ -208,7 +206,6 @@ const displayedPages = computed(() => {
 
   if (current - delta > 2) {
     rangeWithDots.push(1, '...')
-    hasLeftDot = true
   } else {
     for (let i = 1; i < range[0]; i++) {
       rangeWithDots.push(i)
@@ -219,7 +216,6 @@ const displayedPages = computed(() => {
 
   if (current + delta < total - 1) {
     rangeWithDots.push('...', total)
-    hasRightDot = true
   } else {
     for (let i = range[range.length - 1] + 1; i <= total; i++) {
       rangeWithDots.push(i)
@@ -290,9 +286,12 @@ async function handleFilterChange(status: ProjectStatus | 'all', page: number = 
   }
 }
 
-async function handlePageChange(page: number) {
-  if (page < 1 || page > pagination.value.totalPages) return
-  await handleFilterChange(currentFilter.value, page)
+async function handlePageChange(page: number | string) {
+  // Don't handle page changes for '...' indicators
+  if (page === '...') return
+  const pageNum = Number(page)
+  if (pageNum < 1 || pageNum > pagination.value.totalPages) return
+  await handleFilterChange(currentFilter.value, pageNum)
   // Scroll to top
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
