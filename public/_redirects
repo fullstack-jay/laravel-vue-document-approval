@@ -1,0 +1,4 @@
+# Netlify redirects for Vue.js SPA
+# All routes should be handled by index.html
+
+/* /index.html 200
